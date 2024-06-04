@@ -3,6 +3,7 @@ IntEnum = int
 
 from machine import I2C, Pin
 from time import sleep
+from math import pow
 import struct
 
 DEFAULT_ADDRESS = 0x29
@@ -98,12 +99,3 @@ class RgbSensor:
     def setLed(self, state: bool):
         if self._led_pin:
             self._led_pin.value(state)
-
-def calculateColorTemperature(self, r: int, g: int, b: int) -> int:
-    pass
-
-def calculateColorTemperature_dn40(self, r: int, g: int, b: int, c: int) -> int:
-    pass
-
-def calculateLux(self, r: int, g: int, b: int) -> int:
-    pass
