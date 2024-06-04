@@ -1,8 +1,12 @@
+from machine import Pin, PWM, I2C
 from time import sleep, time_ns
-from machine import Pin, I2C
 import rgb_sensor
+import rgb_led
 
 print("starting up")
+
+rgbled = rgb_led.RgbLed(PWM(Pin(15)), PWM(Pin(13)), PWM(Pin(14)))
+rgbled.set_freq(1000)
 
 rgb_sens = rgb_sensor.RgbSensor(I2C(0, scl=Pin(17), sda=Pin(16)), led_pin=Pin(18, Pin.OUT))
 rgb_sens.setIntegrationTime(100)
@@ -33,6 +37,7 @@ while True:
 
     # print(f'distance = {dist}cm')
     print(f'color = {col}')
+    rgbled.color(*col)
 
     print(i)
     i += 1
