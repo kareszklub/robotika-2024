@@ -6,3 +6,25 @@ Megtanítunk robotot építeni, és programozni is, a folyamat elejétől a legv
 Mivel a saját robotodat a tábor után hazaviszed, az alkatrészek ára miatt a foglalkozás kb. 15 000Ft extra költséggel jár a tábor alap ára mellé.
 
 Bácskai Kristóf és Varga Benedek
+
+## Developement
+
+Code is written in [MicroPython](https://docs.micropython.org).
+
+### Type hints
+Install python type hints (make sure to configure them in your editor):
+```bash
+pip install -U micropython-rp2-pico_w-stubs --no-user --target ./typings
+```
+
+### Running the code
+
+Install [MicroPython remote](https://docs.micropython.org/en/latest/reference/mpremote.html) (with pip):
+```bash
+pip install --user mpremote --break-system-packages
+```
+
+Upload the code (press Ctrl+D to exit the repl and see program output):
+```bash
+mpremote a0 + fs cp code/* :. + repl
+```
