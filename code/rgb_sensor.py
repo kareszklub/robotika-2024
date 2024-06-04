@@ -1,7 +1,7 @@
 # from enum import IntEnum
 IntEnum = int
 
-from machine import I2C
+from machine import I2C, Pin
 from time import sleep
 import struct
 
@@ -39,20 +39,22 @@ class EnableRegisterField(IntEnum):
 class RgbSensor:
     _addr: int
     _i2c: I2C
+    _led_pin: Pin
 
-    def __init__(self, i2c: I2C, addr = DEFAULT_ADDRESS):
-        self._i2c = i2c
+    def __init__(self, i2c: I2C, addr = DEFAULT_ADDRESS, led_pin=None):
+        self._led_pin = led_pin
         self._addr = addr
+        self._i2c = i2c
 
-        self.write_bits(Register.ENABLE, 1, EnableRegisterField.PON)
-        sleep(0.003)
-        self.write_bits(Register.ENABLE, 1, EnableRegisterField.AEN)
+        self.write_bits(Register.ENABLE, 0b01, EnableRegisterField.PON)
+        sleep(0.01)
+        self.write_bits(Register.ENABLE, 0b10, EnableRegisterField.AEN)
 
     def write8(self, reg: Register, value: int):
-        self._i2c.writeto_mem(self._addr, CMD_BIT | reg, (value & 0xFF).to_bytes())
+        self._i2c.writeto_mem(self._addr, CMD_BIT | reg, (value & 0xFF).to_bytes(1, 'little'))
 
     def write16(self, reg: Register, value: int):
-        self._i2c.writeto_mem(self._addr, CMD_BIT | reg, (value & 0xFFFF).to_bytes(2))
+        self._i2c.writeto_mem(self._addr, CMD_BIT | reg, (value & 0xFFFF).to_bytes(2, 'little'))
 
     def write_bits(self, reg: Register, value: int, mask: int):
         old = self.read8(reg)
@@ -62,7 +64,7 @@ class RgbSensor:
         self.write8(reg, new)
 
     def read8(self, reg: Register):
-        return struct.unpack('<B', self._i2c.readfrom_mem(self._addr, CMD_BIT | reg, 1))
+        return struct.unpack('<B', self._i2c.readfrom_mem(self._addr, CMD_BIT | reg, 1))[0]
 
     def read16(self, reg: Register):
         struct.unpack('<H', self._i2c.readfrom_mem(self._addr, CMD_BIT | reg, 2))
@@ -92,6 +94,10 @@ class RgbSensor:
 
     def setInterruptPersistance(self, pers: int):
         self.write_bits(Register.PERS, pers, 0b111)
+
+    def setLed(self, state: bool):
+        if self._led_pin:
+            self._led_pin.value(state)
 
 def calculateColorTemperature(self, r: int, g: int, b: int) -> int:
     pass
