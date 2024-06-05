@@ -1,5 +1,4 @@
 from machine import I2C, Pin
-from typing import Callable
 from time import sleep_ms
 import struct
 
@@ -85,7 +84,7 @@ class RgbSensor:
     def set_wait_long(self, flag: bool):
         self.write_bits(Register.CONFIG, int(flag), 0b1)
 
-    def set_interrupt(self, f: Callable[[Pin]]):
+    def set_interrupt(self, f):
         self.write_bits(Register.ENABLE, AIEN, AIEN)
         self._interrupt_pin.irq(f, Pin.IRQ_RISING)
 
