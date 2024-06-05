@@ -1,15 +1,12 @@
-# from enum import IntEnum
-IntEnum = int
-
 from machine import I2C, Pin
-from time import sleep
-from math import pow
+from typing import Callable
+from time import sleep_ms
 import struct
 
 DEFAULT_ADDRESS = 0x29
 CMD_BIT = 0x80
 
-class Register(IntEnum):
+class Register:
     ENABLE  = 0x00
     ATIME   = 0x01
     WTIME   = 0x03
@@ -31,25 +28,27 @@ class Register(IntEnum):
     BDATAL  = 0x1A
     BDATAH  = 0x1B
 
-class EnableRegisterField(IntEnum):
-    PON  = 0x01
-    AEN  = 0x02
-    WEN  = 0x08
-    AIEN = 0x10
+PON  = 0x01
+AEN  = 0x02
+WEN  = 0x08
+AIEN = 0x10
 
 class RgbSensor:
     _addr: int
     _i2c: I2C
+
+    _interrupt_pin: Pin
     _led_pin: Pin
 
-    def __init__(self, i2c: I2C, addr = DEFAULT_ADDRESS, led_pin=None):
+    def __init__(self, i2c: I2C, addr = DEFAULT_ADDRESS, led_pin: Pin = None, interrupt_pin: Pin = None):
+        self._interrupt_pin = interrupt_pin
         self._led_pin = led_pin
         self._addr = addr
         self._i2c = i2c
 
-        self.write_bits(Register.ENABLE, 0b01, EnableRegisterField.PON)
-        sleep(0.01)
-        self.write_bits(Register.ENABLE, 0b10, EnableRegisterField.AEN)
+        self.write_bits(Register.ENABLE, PON, PON)
+        sleep_ms(10)
+        self.write_bits(Register.ENABLE, AEN, AEN)
 
     def write8(self, reg: Register, value: int):
         self._i2c.writeto_mem(self._addr, CMD_BIT | reg, (value & 0xFF).to_bytes(1, 'little'))
@@ -70,32 +69,37 @@ class RgbSensor:
     def read16(self, reg: Register):
         struct.unpack('<H', self._i2c.readfrom_mem(self._addr, CMD_BIT | reg, 2))
 
-    def getData(self) -> tuple[int, int, int, int]:
+    def get_data(self) -> tuple[int, int, int, int]:
         color_bytes = self._i2c.readfrom_mem(self._addr, CMD_BIT | Register.CDATAL, 4 * 2)
         return struct.unpack('<HHHH', color_bytes)
 
-    def setIntegrationTime(self, it: int):
+    def set_integration_time(self, it: int):
         self.write8(Register.ATIME, 0xff - it)
 
-    def setGain(self, gain: int):
+    def set_gain(self, gain: int):
         self.write_bits(Register.CONTROL, gain, 0b11)
 
-    def setWait(self, wait: int):
+    def set_wait(self, wait: int):
         self.write8(Register.ATIME, 0xff - wait)
 
-    def setWaitLong(self, flag: bool):
+    def set_wait_long(self, flag: bool):
         self.write_bits(Register.CONFIG, int(flag), 0b1)
 
-    def setInterrupt(self, flag: bool):
-        self.write_bits(Register.ENABLE, int(flag), EnableRegisterField.AIEN)
+    def set_interrupt(self, f: Callable[[Pin]]):
+        self.write_bits(Register.ENABLE, AIEN, AIEN)
+        self._interrupt_pin.irq(f, Pin.IRQ_RISING)
 
-    def setIntLimits(self, l: int, h: int):
+    def clear_interrupt(self):
+        self.write_bits(Register.ENABLE, ~AIEN, AIEN)
+        self._interrupt_pin.irq(None)
+
+    def set_interrupt_limits(self, l: int, h: int):
         self.write16(Register.AILTL, l)
         self.write16(Register.AIHTL, h)
 
-    def setInterruptPersistance(self, pers: int):
+    def set_interrupt_persistance(self, pers: int):
         self.write_bits(Register.PERS, pers, 0b111)
 
-    def setLed(self, state: bool):
+    def set_led(self, state: bool):
         if self._led_pin:
             self._led_pin.value(state)

@@ -1,26 +1,17 @@
 from machine import Pin, PWM, I2C
-from time import sleep, time_ns
-import rgb_sensor
-import rgb_led
+from rgb_sensor import RgbSensor
+from rgb_led import RgbLed
+from time import sleep_ms
 
 print("starting up")
 
-rgbled = rgb_led.RgbLed(PWM(Pin(15)), PWM(Pin(13)), PWM(Pin(14)))
+rgbled = RgbLed(PWM(Pin(15)), PWM(Pin(13)), PWM(Pin(14)))
 rgbled.set_freq(1000)
 
-rgb_sens = rgb_sensor.RgbSensor(I2C(0, scl=Pin(17), sda=Pin(16)), led_pin=Pin(18, Pin.OUT))
-rgb_sens.setIntegrationTime(100)
-rgb_sens.setGain(2)
-rgb_sens.setLed(True)
-
-# sensors = {
-#     'ultra': None,
-#     'rgb': None,
-#     'imu': {
-#         'acceleration': None,
-#         'orientation': None
-#     }
-# }
+rgb_sens = RgbSensor(I2C(0, scl=Pin(17), sda=Pin(16)), led_pin=Pin(18, Pin.OUT))
+rgb_sens.set_integration_time(128)
+rgb_sens.set_gain(1)
+rgb_sens.set_led(True)
 
 led_builtin = Pin("LED", Pin.OUT)
 
@@ -43,4 +34,4 @@ while True:
     i += 1
 
     led_builtin.toggle()
-    sleep(0.2)
+    sleep_ms(200)

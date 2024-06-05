@@ -7,24 +7,38 @@ Mivel a saját robotodat a tábor után hazaviszed, az alkatrészek ára miatt a
 
 Bácskai Kristóf és Varga Benedek
 
-## Developement
+## Szükséges szoftver
 
-Code is written in [MicroPython](https://docs.micropython.org).
+Kezdőknek [Thonny](https://thonny.org) ajánlott, haladóknak [VSCode](https://code.visualstudio.com).
 
 ### Type hints
+
 Install python type hints (make sure to configure them in your editor):
+
 ```bash
 pip install -U micropython-rp2-pico_w-stubs --no-user --target ./typings
+```
+
+To remove missing module source warnings in vscode put this into [.vscode/settings.json](./.vscode/settings.json):
+
+```json
+{
+    "python.analysis.diagnosticSeverityOverrides": {
+        "reportMissingModuleSource": "none"
+    }
+}
 ```
 
 ### Running the code
 
 Install [MicroPython remote](https://docs.micropython.org/en/latest/reference/mpremote.html) (with pip):
+
 ```bash
 pip install --user mpremote --break-system-packages
 ```
 
 Upload the code (press Ctrl+D to exit the repl and see program output):
+
 ```bash
 mpremote a0 + fs cp code/* :. + repl
 ```
