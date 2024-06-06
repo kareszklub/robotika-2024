@@ -1,8 +1,13 @@
 from time import sleep, time_ns
 from machine import Pin
 
-trig = Pin(16, Pin.OUT)
-echo = Pin(17, Pin.IN)
+class UltraSensor:
+    _trig: Pin(16, Pin.OUT)
+    _echo: Pin(17, Pin.IN)
+
+    def __init__(self, trig: Pin, echo: Pin):
+        self._trig = trig
+        self._echo = echo
 
 def get_dist_sync():
     trig.on()

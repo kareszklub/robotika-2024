@@ -1,9 +1,4 @@
 from machine import Pin, PWM
-from time import sleep_ms
-
-led_rgb_r = Pin(13, Pin.OUT)
-led_rgb_g = Pin(12, Pin.OUT)
-led_rgb_b = Pin(11, Pin.OUT)
 
 class RgbLed:
 	_r: PWM
@@ -20,13 +15,12 @@ class RgbLed:
 		self._g.freq(freq)
 		self._b.freq(freq)
 
-	def color(self, r: int, g: int, b: int):
-		self._r.duty_u16(0xffff - r * 0xff)
-		self._g.duty_u16(0xffff - g * 0xff)
-		self._b.duty_u16(0xffff - b * 0xff)
+	def color(self, r: float, g: float, b: float):
+		self._r.duty_u16(int(0xffff - r * 0xffff))
+		self._g.duty_u16(int(0xffff - g * 0xffff))
+		self._b.duty_u16(int(0xffff - b * 0xffff))
 
 	def off(self):
 		self._r.duty_u16(0xffff)
 		self._g.duty_u16(0xffff)
 		self._b.duty_u16(0xffff)
-

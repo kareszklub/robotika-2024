@@ -33,7 +33,7 @@ while i < secs * 5:
     col = get_rgb_sync()
 
     # print(f'distance = {dist}cm')
-    print(f'color = {col}')
+    print(f'color = {col}, grayscale = {rgb_to_grayscale(*col)}')
     rgbled.color(*col)
 
     led_builtin.toggle()
