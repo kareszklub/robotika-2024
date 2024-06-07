@@ -15,9 +15,9 @@ with open('config.json') as f:
     cfg = json.load(f)
 
 rgb_led = RgbLed(
-    Pin(cfg['rgb_led']['r']),
-    Pin(cfg['rgb_led']['g']),
-    Pin(cfg['rgb_led']['b'])
+    Pin(cfg['rgb_led']['r'], Pin.OUT),
+    Pin(cfg['rgb_led']['g'], Pin.OUT),
+    Pin(cfg['rgb_led']['b'], Pin.OUT)
 )
 
 rgb_sensor = RgbSensor(
@@ -26,16 +26,17 @@ rgb_sensor = RgbSensor(
         scl=Pin(cfg['rgb_sensor']['scl']),
         sda=Pin(cfg['rgb_sensor']['sda'])
     ),
+
     led_pin=Pin(cfg['rgb_sensor']['led'], Pin.OUT)
         if cfg['rgb_sensor']['led'] else None,
     interrupt_pin=Pin(cfg['rgb_sensor']['int'], Pin.OUT)
-        if cfg['rgb_sensor']['int'] else None
-)
+        if cfg['rgb_sensor']['int'] else None,
 
-if cfg['rgb_sensor']['integration_time']:
-    rgb_sensor.set_integration_time(cfg['rgb_sensor']['integration_time'])
-if cfg['rgb_sensor']['gain']:
-    rgb_sensor.set_gain(cfg['rgb_sensor']['gain'])
+    integration_time=cfg['rgb_sensor']['integration_time']
+        if cfg['rgb_sensor']['integration_time'] else 0,
+    gain=cfg['rgb_sensor']['gain']
+        if cfg['rgb_sensor']['gain'] else 0
+)
 
 rgb_sensor.set_led(True)
 
@@ -44,7 +45,28 @@ ultra_sensor = UltraSensor(
     Pin(cfg['ultra_sensor']['echo'], Pin.IN)
 )
 
-servo = Servo(Pin(cfg['servo']['pin']))
+servo = Servo(
+    Pin(cfg['servo']['pin'], Pin.OUT),
+
+    cfg['servo']['min_duty'],
+    cfg['servo']['max_duty']
+)
+
+h_bridge = HBridge(
+    Pin(cfg['h_bridge']['pwm_l'],  Pin.OUT),
+    Pin(cfg['h_bridge']['pwm_r'],  Pin.OUT),
+    Pin(cfg['h_bridge']['in_l_1'], Pin.OUT),
+    Pin(cfg['h_bridge']['in_l_2'], Pin.OUT),
+    Pin(cfg['h_bridge']['in_r_1'], Pin.OUT),
+    Pin(cfg['h_bridge']['in_r_2'], Pin.OUT),
+
+    cfg['h_bridge']['freq']
+)
+
+buzzer = Buzzer(
+    Pin(cfg['buzzer']['pin'], Pin.OUT),
+    freq=cfg['buzzer']['freq']
+)
 
 led_builtin = Pin("LED", Pin.OUT)
 
@@ -58,7 +80,7 @@ def get_rgb_sync() -> tuple[float, float, float]:
     return r / c, g / c, b / c
 
 i = 0
-secs = 15
+secs = 3
 
 while i < secs * 5:
     dist = ultra_sensor.measure_sync()

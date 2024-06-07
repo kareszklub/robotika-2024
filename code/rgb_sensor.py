@@ -39,7 +39,11 @@ class RgbSensor:
     _interrupt_pin: Pin
     _led_pin: Pin
 
-    def __init__(self, i2c: I2C, addr = DEFAULT_ADDRESS, led_pin: Pin = None, interrupt_pin: Pin = None):
+    def __init__(
+            self, i2c: I2C, addr = DEFAULT_ADDRESS,
+            led_pin: Pin = None, interrupt_pin: Pin = None,
+            integration_time: int = 0, gain: int = 0
+        ):
         self._interrupt_pin = interrupt_pin
         self._led_pin = led_pin
         self._addr = addr
@@ -48,6 +52,11 @@ class RgbSensor:
         self._write_bits(Register.ENABLE, PON, PON)
         sleep_ms(10)
         self._write_bits(Register.ENABLE, AEN, AEN)
+
+        if integration_time:
+            self.set_integration_time(integration_time)
+        if gain:
+            self.set_gain(gain)
 
     def _write8(self, reg: Register, value: int):
         self._i2c.writeto_mem(self._addr, CMD_BIT | reg, (value & 0xFF).to_bytes(1, 'little'))

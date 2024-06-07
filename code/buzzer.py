@@ -1,10 +1,10 @@
-from machine import PWM
+from machine import PWM, Pin
 
 class Buzzer:
 	_p: PWM
 
-	def __init__(self, p: Pin):
-		self._p = PWM(p, freq=2000)
+	def __init__(self, p: Pin, freq: int = 2000):
+		self._p = PWM(p, freq)
 
 	def set_freq(self, freq: int):
 		self._p.freq(freq)
