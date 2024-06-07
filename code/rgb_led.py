@@ -5,10 +5,10 @@ class RgbLed:
 	_g: PWM
 	_b: PWM
 
-	def __init__(self, r: PWM, g: PWM, b: PWM):
-		self._r = r
-		self._g = g
-		self._b = b
+	def __init__(self, r: Pin, g: Pin, b: Pin, freq=2000):
+		self._r = PWM(r, freq=freq)
+		self._g = PWM(g, freq=freq)
+		self._b = PWM(b, freq=freq)
 
 	def set_freq(self, freq: int):
 		self._r.freq(freq)
