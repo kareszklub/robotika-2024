@@ -1,14 +1,37 @@
 #!/bin/python3
 import matplotlib.pyplot as plt
 import numpy as np
-import re
+import csv
 
-with open('testing/output.txt') as f:
-	txt = f.read()
+rgb_array = []
+dist_array = []
 
-fs = re.findall(r'color = \((\d+), (\d+), (\d+)\)', txt)
-rgb_array = [[int(m[0]), int(m[1]), int(m[2])] for m in fs]
+with open('testing/output.txt', newline='') as f:
+	reader = csv.reader(f.readlines(), delimiter=';', quoting=csv.QUOTE_NONE)
 
+	for l in reader:
+		if len(l) != 3:
+			continue
+		# print(f'{l=}')
+
+		m = l[1].split(',')
+		rgb_array.append([int(m[0][1:]), int(m[1]), int(m[2][:-1])])
+		
+		dist_array.append(float(l[2]) if l[2] != 'None' else 0)
+
+	print('done parsing')
+
+if len(rgb_array) == 0:
+	exit(-1)
+
+
+plt.figure()
+plt.title('Robot data')
+
+plt.subplot(211, title='rgb sensor')
 img = np.array(rgb_array, dtype=int).reshape((1, len(rgb_array), 3))
-plt.imshow(img, extent=[0, len(rgb_array), 0, 1], aspect='auto')
+plt.plot(img, extent=[0, len(rgb_array), 0, 1], aspect='auto')
+
+plt.subplot(212, title='ultra sensor')
+plt.plot(dist_array)
 plt.show()
