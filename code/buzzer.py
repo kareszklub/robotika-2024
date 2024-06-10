@@ -6,6 +6,8 @@ class Buzzer:
 	def __init__(self, p: Pin, freq: int = 2000):
 		self._p = PWM(p, freq)
 
+		print(f'buzzer:\n\t{self._p}')
+
 	def set_freq(self, freq: int):
 		self._p.freq(freq)
 

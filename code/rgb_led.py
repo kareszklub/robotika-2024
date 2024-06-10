@@ -10,6 +10,8 @@ class RgbLed:
 		self._g = PWM(g, freq=freq)
 		self._b = PWM(b, freq=freq)
 
+		print(f'led:\n\t{self._r}\n\t{self._g}\n\t{self._b}')
+
 	def set_freq(self, freq: int):
 		self._r.freq(freq)
 		self._g.freq(freq)

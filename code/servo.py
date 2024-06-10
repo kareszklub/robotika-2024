@@ -13,11 +13,12 @@ class Servo:
 		self._min = min_duty
 		self._max = max_duty
 
+		print(f'servo:\n\t{self._p}')
+
 	def duty(self, d: float):
 		d = clamp(d, 0, 1)
 
 		duty = self._min + int((self._max - self._min) * d)
-		print(f'servo to {d} (deg), {duty=}')
 		self._p.duty_ns(duty)
 
 	def deg(self, d: float):
