@@ -22,7 +22,7 @@ class HBridge:
 		self._r_1 = r_1
 		self._r_2 = r_2
 
-		print(f'HBridge:\n\t{self._l_pwm}\n\t{self._r_pwm}')
+		# print(f'HBridge:\n\t{self._l_pwm}\n\t{self._r_pwm}')
 
 	def drive(self, l: float, r: float):
 		self._l_1.value(l < 0)
@@ -38,8 +38,8 @@ class HBridge:
 		self._r_2.value(True)
 		self._r_1.value(True)
 		self._r_2.value(True)
-		self._l_pwm.duty_u16(0xffff)
-		self._r_pwm.duty_u16(0xffff)
+		self._l_pwm.duty_u16(0)
+		self._r_pwm.duty_u16(0)
 
 	def set_freq(self, freq: int):
 		self._l_pwm.freq(freq)

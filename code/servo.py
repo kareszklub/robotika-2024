@@ -8,12 +8,13 @@ class Servo:
 	_min: int
 	_max: int
 
-	def __init__(self, p: Pin, min_duty=1_000_000, max_duty=1_000_000):
-		self._p = PWM(p, freq=50)
+	def __init__(self, p: Pin, freq: int = 50,
+		min_duty: int = 1_000_000, max_duty: int = 1_000_000):
+		self._p = PWM(p, freq)
 		self._min = min_duty
 		self._max = max_duty
 
-		print(f'servo:\n\t{self._p}')
+		# print(f'servo:\n\t{self._p}')
 
 	def duty(self, d: float):
 		d = clamp(d, 0, 1)
@@ -30,4 +31,4 @@ class Servo:
 		self.duty(d)
 
 	def off(self):
-		self._p.duty_u16(0)
+		self._p.deinit(0)

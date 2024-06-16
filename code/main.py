@@ -9,6 +9,8 @@ from rgb_led import RgbLed
 from buzzer import Buzzer
 from servo import Servo
 
+from utils import rgb_rel
+
 print("starting up")
 
 with open('config.json') as f:
@@ -32,10 +34,8 @@ rgb_sensor = RgbSensor(
     interrupt_pin=Pin(cfg['rgb_sensor']['int'], Pin.OUT)
         if cfg['rgb_sensor']['int'] else None,
 
-    integration_time=cfg['rgb_sensor']['integration_time']
-        if cfg['rgb_sensor']['integration_time'] else 0,
+    integration_time=cfg['rgb_sensor']['integration_time'],
     gain=cfg['rgb_sensor']['gain']
-        if cfg['rgb_sensor']['gain'] else 0
 )
 
 rgb_sensor.set_led(True)
@@ -47,6 +47,8 @@ ultra_sensor = UltraSensor(
 
 servo = Servo(
     Pin(cfg['servo']['pin'], Pin.OUT),
+
+    cfg['servo']['freq'],
 
     cfg['servo']['min_duty'],
     cfg['servo']['max_duty']
@@ -72,21 +74,14 @@ led_builtin = Pin("LED", Pin.OUT)
 
 print("done with initalization")
 
-def get_rgb_sync() -> tuple[float, float, float]:
-    c, r, g, b = rgb_sensor.get_data()
-    # print(f'raw = {(c, r, g, b)}')
-    if c == 0:
-        return 0, 0, 0
-    return r / c, g / c, b / c
-
 i = 0
 secs = 3
 
 while i < secs * 5:
     dist = ultra_sensor.measure_sync()
-    col = get_rgb_sync()
+    col = rgb_rel(*rgb_sensor.get_data())
 
-    rgb_led.color(*col)
+    rgb_led.set_color(*col)
 
     col = (int(0xff * col[0]), int(0xff * col[1]), int(0xff * col[2]))
     print(f'{i};{col};{dist}')

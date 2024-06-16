@@ -6,6 +6,11 @@ def clamp(f: float, mn: float, mx: float) -> float:
 		return mx
 	return f
 
+def rgb_rel(c: int, r: int, g: int, b: int) -> tuple[float, float, float]:
+    if c == 0:
+        return 0, 0, 0
+    return r / c, g / c, b / c
+
 def rgb_to_hsv(r: float, g: float, b: float) -> float:
     cmax = max(r, g, b)
     cmin = min(r, g, b)

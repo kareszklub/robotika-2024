@@ -40,7 +40,7 @@ class RgbSensor:
     _led_pin: Pin
 
     def __init__(
-            self, i2c: I2C, addr = DEFAULT_ADDRESS,
+            self, i2c: I2C, addr: int = DEFAULT_ADDRESS,
             led_pin: Pin = None, interrupt_pin: Pin = None,
             integration_time: int = 0, gain: int = 0
         ):
