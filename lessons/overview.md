@@ -1,0 +1,38 @@
+# Topics
+
+ - mit fogunk megépíteni
+   - motor rpm, torque, max speed
+   - power management (no step down)
+   - 3d modelling - dapa
+ - pico
+   - dev env setup (TODO: mail!)
+     - vscode
+     - type hints
+     - mpremote
+   - uPy firmware upload
+   - Hello World / uPy basics
+   - uC basics (pins)
+ - breadboard
+ - builtin led
+ - buzzer
+   - pwm
+ - rgb led
+   - electronics basics
+ - ultra sensor
+ - config.json
+ - motorok
+   - H bridge
+ - PID (faltól x távolság)
+ - rgb szenzor
+   - i2c
+ - multithreading
+   - race conditions, synchronisation
+ - servo
+ - networking basics
+   - tcp/ip
+ - extras
+   - C/C++
+   - PCB
+   - encoder
+   - imu
+     - sensor fusion / Kalman filter
