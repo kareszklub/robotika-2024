@@ -1,35 +1,26 @@
 #!/bin/env python3
+from typing import Callable
 from math import pi
 
-try:
-	wheel_diameter = int(input('wheel diameter (40mm): '))
-except:
-	wheel_diameter = 40
-wheel_diameter /= 1000
-wheel_radius = wheel_diameter * 0.5
+def get_param[T](name: str, unit: str, ty: Callable[[str], T], default: T) -> T:
+	try:
+		ty(input(f'{name} ({default}{unit}): '))
+	except Exception:
+		pass
+	except KeyboardInterrupt:
+		print()
+		exit(0)
 
-try:
-	motor_torque = int(input('motor torque (8mNm): '))
-except:
-	motor_torque = 8
-motor_torque /= 1000
+	return default
 
-try:
-	motor_rpm = int(input('motor rpm (200): '))
-except:
-	motor_rpm = 200
+wheel_diameter = get_param('wheel diameter', 'mm',   float, 40)  / 1000
+motor_torque   = get_param('motor torque',   'mNm',  float, 8)   / 1000
+motor_rpm      = get_param('motor rpm',      '/60s', float, 200)
+motors         = get_param('motor count',    '',     int,   2)
+weight         = get_param('weight',         'g',    float, 500) / 1000
+
+wheel_radius = wheel_diameter / 2
 motor_rps = motor_rpm / 60
-
-try:
-	motors = int(input('motor count (2): '))
-except:
-	motors = 2
-
-try:
-	weight = int(input('weight (500g): '))
-except:
-	weight = 500
-weight /= 1000
 
 print(f'robot params: {wheel_diameter=}cm {motor_torque=}mNm {motor_rpm=} {motors=} {weight=}g')
 
