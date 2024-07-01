@@ -4,18 +4,17 @@
 
 - mit fogunk megépíteni
   - motor rpm, torque, max speed
-  - power management (no step down)
   - 3d modell - dapa?
-- pico
-  - dev env setup (TODO: mail!)
-    - vscode
-    - type hints
-    - mpremote
-  - uPy firmware upload
-  - Hello World / uPy basics
-  - uC basics (pins)
-- breadboard
+- dev env setup (TODO: mail!)
+  - vscode
+  - type hints
+  - mpremote
+- uPy firmware upload
+- Hello World / uPy basics
+- ?git?
+- uC basics (pins)
 - builtin led
+- breadboard
 - buzzer
   - pwm
 - rgb led
@@ -23,34 +22,47 @@
 
 ## Lesson #2
 
-- ultra sensor
+- servo
 - config.json
 - motorok
   - H bridge
-- PID (faltól x távolság)
+
+- ultra sensor
 
 ## Lesson #3
 
 - rgb szenzor
   - i2c
+- color identification
+
+- multithreading
+  - separate sensor / control loop
 
 ## Lesson #4
 
-- multithreading
-- servo
+- interrupts blah blah
+- PID (faltól x távolság)
+- wall hugging
 
 ## Lesson #5
 
+- line following
+
+## Lesson #6
+
 - networking basics
   - tcp/ip
-- connecting to the server
+- reimplement debug
 
 ## Lesson #7
 
 - extras
+  - power management
+  - udp / http
+  - dependencies
   - floating point error
-  - race conditions, synchronisation
-  - C/C++
+  - mutex vs channel
+  - C/C++ / rust
   - pio
   - PCB
   - clamping diodes
@@ -59,3 +71,11 @@
   - encoder
   - imu
     - sensor fusion / Kalman filter
+  - fpga
+  - timer
+    - input capture
+  - bldc
+
+## Lesson #8
+
+## Lesson #9
