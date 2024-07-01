@@ -1,4 +1,6 @@
 .vscode
 typings
 testing
+
 config.json
+.mpy
