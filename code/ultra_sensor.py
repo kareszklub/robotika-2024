@@ -1,5 +1,7 @@
-from time import sleep_us, time_ns
+from time import sleep_us, ticks_us, ticks_diff
 from machine import Pin
+
+CM_PER_US = const(1 / (343 * 1000))
 
 class UltraSensor:
     _trig: Pin
@@ -14,19 +16,17 @@ class UltraSensor:
         sleep_us(10)
         self._trig.value(False)
 
+        cycle_start = ticks_us()
         while not self._echo.value():
-            pass
+            if ticks_diff(ticks_us(), cycle_start) >= 60_000:
+                return None
 
-        start = time_ns()
-        diff = 0
+        start = ticks_us()
+        while self._echo.value():
+            if ticks_diff(ticks_us(), cycle_start) >= 60_000:
+                return None
 
-        while self._echo.value() and diff < 60_000_000:
-            diff = time_ns() - start
-        duration = diff / 1000
-
-        cm = duration / 29 / 2
+        dur_us = ticks_diff(ticks_us(), start)
+        cm = dur_us * CM_PER_US
     
-        if cm > 300:
-            return None
-
-        return cm
+        return cm if cm <= 300 else None

@@ -2,46 +2,46 @@ from machine import I2C, Pin
 from time import sleep_ms
 import struct
 
-DEFAULT_ADDRESS = 0x29
-CMD_BIT = 0x80
+DEFAULT_ADDRESS = const(0x29)
+CMD_BIT = const(0x80)
 
 class Register:
-    ENABLE  = 0x00
-    ATIME   = 0x01
-    WTIME   = 0x03
-    AILTL   = 0x04
-    AILTH   = 0x05
-    AIHTL   = 0x06
-    AIHTH   = 0x07
-    PERS    = 0x0C
-    CONFIG  = 0x0D
-    CONTROL = 0x0F
-    ID      = 0x12
-    STATUS  = 0x13
-    CDATAL  = 0x14
-    CDATAH  = 0x15
-    RDATAL  = 0x16
-    RDATAH  = 0x17
-    GDATAL  = 0x18
-    GDATAH  = 0x19
-    BDATAL  = 0x1A
-    BDATAH  = 0x1B
+    ENABLE  = const(0x00)
+    ATIME   = const(0x01)
+    WTIME   = const(0x03)
+    AILTL   = const(0x04)
+    AILTH   = const(0x05)
+    AIHTL   = const(0x06)
+    AIHTH   = const(0x07)
+    PERS    = const(0x0C)
+    CONFIG  = const(0x0D)
+    CONTROL = const(0x0F)
+    ID      = const(0x12)
+    STATUS  = const(0x13)
+    CDATAL  = const(0x14)
+    CDATAH  = const(0x15)
+    RDATAL  = const(0x16)
+    RDATAH  = const(0x17)
+    GDATAL  = const(0x18)
+    GDATAH  = const(0x19)
+    BDATAL  = const(0x1A)
+    BDATAH  = const(0x1B)
 
-PON  = 0x01
-AEN  = 0x02
-WEN  = 0x08
-AIEN = 0x10
+PON  = const(0x01)
+AEN  = const(0x02)
+WEN  = const(0x08)
+AIEN = const(0x10)
 
 class RgbSensor:
     _addr: int
     _i2c: I2C
 
-    _interrupt_pin: Pin
-    _led_pin: Pin
+    _interrupt_pin: Pin | None
+    _led_pin: Pin | None
 
     def __init__(
             self, i2c: I2C, addr: int = DEFAULT_ADDRESS,
-            led_pin: Pin = None, interrupt_pin: Pin = None,
+            led_pin: Pin | None = None, interrupt_pin: Pin | None = None,
             integration_time: int = 0, gain: int = 0
         ):
         self._interrupt_pin = interrupt_pin
@@ -58,24 +58,24 @@ class RgbSensor:
         if gain:
             self.set_gain(gain)
 
-    def _write8(self, reg: Register, value: int):
+    def _write8(self, reg: int, value: int):
         self._i2c.writeto_mem(self._addr, CMD_BIT | reg, (value & 0xFF).to_bytes(1, 'little'))
 
-    def _write16(self, reg: Register, value: int):
+    def _write16(self, reg: int, value: int):
         self._i2c.writeto_mem(self._addr, CMD_BIT | reg, (value & 0xFFFF).to_bytes(2, 'little'))
 
-    def _write_bits(self, reg: Register, value: int, mask: int):
+    def _write_bits(self, reg: int, value: int, mask: int):
         old = self._read8(reg)
         old_masked = old & ~mask
         new = old_masked | value & mask
 
         self._write8(reg, new)
 
-    def _read8(self, reg: Register):
+    def _read8(self, reg: int) -> int:
         return struct.unpack('<B', self._i2c.readfrom_mem(self._addr, CMD_BIT | reg, 1))[0]
 
-    def _read16(self, reg: Register):
-        struct.unpack('<H', self._i2c.readfrom_mem(self._addr, CMD_BIT | reg, 2))
+    def _read16(self, reg: int) -> int:
+        return struct.unpack('<H', self._i2c.readfrom_mem(self._addr, CMD_BIT | reg, 2))[0]
 
     def get_data(self) -> tuple[int, int, int, int]:
         color_bytes = self._i2c.readfrom_mem(self._addr, CMD_BIT | Register.CDATAL, 4 * 2)

@@ -22,8 +22,6 @@ class HBridge:
 		self._r_1 = r_1
 		self._r_2 = r_2
 
-		# print(f'HBridge:\n\t{self._l_pwm}\n\t{self._r_pwm}')
-
 	def drive(self, l: float, r: float):
 		self._l_1.value(l < 0)
 		self._l_2.value(l > 0)

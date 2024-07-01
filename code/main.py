@@ -1,100 +1,84 @@
-from machine import Pin, PWM, I2C
+from _thread import start_new_thread
 from time import sleep_ms
-import json
+from machine import Pin
 
-from ultra_sensor import UltraSensor
-from rgb_sensor import RgbSensor
+from sernsor_thread import sensor_thread_main, Sensors
 from h_bridge import HBridge
 from rgb_led import RgbLed
 from buzzer import Buzzer
 from servo import Servo
 
 from utils import rgb_rel
+from config import cfg
 
-print("starting up")
+def main():
+    print("starting up")
+    
+    sensor_data = Sensors()
+    start_new_thread(sensor_thread_main, (sensor_data))
 
-with open('config.json') as f:
-    cfg = json.load(f)
+    rgb_led = RgbLed(
+        Pin(cfg['rgb_led']['r'], Pin.OUT),
+        Pin(cfg['rgb_led']['g'], Pin.OUT),
+        Pin(cfg['rgb_led']['b'], Pin.OUT)
+    )
 
-rgb_led = RgbLed(
-    Pin(cfg['rgb_led']['r'], Pin.OUT),
-    Pin(cfg['rgb_led']['g'], Pin.OUT),
-    Pin(cfg['rgb_led']['b'], Pin.OUT)
-)
+    servo = Servo(
+        Pin(cfg['servo']['pin'], Pin.OUT),
 
-rgb_sensor = RgbSensor(
-    I2C(
-        cfg['rgb_sensor']['i2c_chan'],
-        scl=Pin(cfg['rgb_sensor']['scl']),
-        sda=Pin(cfg['rgb_sensor']['sda'])
-    ),
+        cfg['servo']['freq'],
 
-    led_pin=Pin(cfg['rgb_sensor']['led'], Pin.OUT)
-        if cfg['rgb_sensor']['led'] else None,
-    interrupt_pin=Pin(cfg['rgb_sensor']['int'], Pin.OUT)
-        if cfg['rgb_sensor']['int'] else None,
+        cfg['servo']['min_duty'],
+        cfg['servo']['max_duty']
+    )
 
-    integration_time=cfg['rgb_sensor']['integration_time'],
-    gain=cfg['rgb_sensor']['gain']
-)
+    h_bridge = HBridge(
+        Pin(cfg['h_bridge']['pwm_l'],  Pin.OUT),
+        Pin(cfg['h_bridge']['pwm_r'],  Pin.OUT),
+        Pin(cfg['h_bridge']['in_l_1'], Pin.OUT),
+        Pin(cfg['h_bridge']['in_l_2'], Pin.OUT),
+        Pin(cfg['h_bridge']['in_r_1'], Pin.OUT),
+        Pin(cfg['h_bridge']['in_r_2'], Pin.OUT),
 
-rgb_sensor.set_led(True)
+        cfg['h_bridge']['freq']
+    )
 
-ultra_sensor = UltraSensor(
-    Pin(cfg['ultra_sensor']['trig'], Pin.OUT),
-    Pin(cfg['ultra_sensor']['echo'], Pin.IN)
-)
+    buzzer = Buzzer(
+        Pin(cfg['buzzer']['pin'], Pin.OUT),
+        freq=cfg['buzzer']['freq']
+    )
 
-servo = Servo(
-    Pin(cfg['servo']['pin'], Pin.OUT),
+    led_builtin = Pin("LED", Pin.OUT)
 
-    cfg['servo']['freq'],
+    print("done with initalization")
 
-    cfg['servo']['min_duty'],
-    cfg['servo']['max_duty']
-)
+    i = 0
+    secs = 3
 
-h_bridge = HBridge(
-    Pin(cfg['h_bridge']['pwm_l'],  Pin.OUT),
-    Pin(cfg['h_bridge']['pwm_r'],  Pin.OUT),
-    Pin(cfg['h_bridge']['in_l_1'], Pin.OUT),
-    Pin(cfg['h_bridge']['in_l_2'], Pin.OUT),
-    Pin(cfg['h_bridge']['in_r_1'], Pin.OUT),
-    Pin(cfg['h_bridge']['in_r_2'], Pin.OUT),
+    while i < secs * 5:
+        sensor_data.lock.acquire()
+        dist = sensor_data.dist
+        col = rgb_rel(*sensor_data.rgb)
+        sensor_data.lock.release()
 
-    cfg['h_bridge']['freq']
-)
+        rgb_led.set_color(*col)
 
-buzzer = Buzzer(
-    Pin(cfg['buzzer']['pin'], Pin.OUT),
-    freq=cfg['buzzer']['freq']
-)
+        col = (int(0xff * col[0]), int(0xff * col[1]), int(0xff * col[2]))
+        print(f'{i};{col};{dist}')
 
-led_builtin = Pin("LED", Pin.OUT)
+        i += 1
+        led_builtin.toggle()
+        sleep_ms(100)
 
-print("done with initalization")
+    print('done')
 
-i = 0
-secs = 3
+    sensor_data.sleep = True
 
-while i < secs * 5:
-    dist = ultra_sensor.measure_sync()
-    col = rgb_rel(*rgb_sensor.get_data())
+    h_bridge.drive(0, 0)
+    buzzer.off()
+    servo.off()
+    rgb_led.off()
 
-    rgb_led.set_color(*col)
 
-    col = (int(0xff * col[0]), int(0xff * col[1]), int(0xff * col[2]))
-    print(f'{i};{col};{dist}')
-
-    i += 1
-    led_builtin.toggle()
-    sleep_ms(100)
-
-rgb_sensor.set_led(False)
-rgb_led.off()
-
-print('done')
-
-# while True:
-#     led_builtin.toggle()
-#     sleep_ms(1000)
+if __name__ == '__main__':
+    main()

@@ -10,8 +10,6 @@ class RgbLed:
 		self._g = PWM(g, freq=freq)
 		self._b = PWM(b, freq=freq)
 
-		# print(f'led:\n\t{self._r}\n\t{self._g}\n\t{self._b}')
-
 	def set_color(self, r: float, g: float, b: float):
 		self._r.duty_u16(int(0xffff - r * 0xffff))
 		self._g.duty_u16(int(0xffff - g * 0xffff))
