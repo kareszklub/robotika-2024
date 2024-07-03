@@ -9,6 +9,8 @@ from buzzer import Buzzer
 from servo import Servo
 
 from utils import rgb_rel
+
+from networking import robot_id
 from config import cfg
 
 def main():
