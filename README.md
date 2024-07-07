@@ -45,6 +45,14 @@ mpremote a0 + fs cp code/* config.json :. + repl
 
 ## Color plotter
 
+### bash
+
 ```bash
-c ; mpremote a0 + fs cp code/* config.json :. + reset && sleep 1 && sudo cat /dev/ttyACM0 |  py plot_data.py
+mpremote a0 + fs cp code/* config.json :. + reset && sleep 1 && sudo cat /dev/ttyACM0 | py plot_data.py
+```
+
+### cmd
+
+```cmd
+mpremote a0 + fs cp code/* config.json :. + reset && sleep 1 && type com1: >> data.log | py plot_data.py
 ```
