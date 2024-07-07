@@ -9,7 +9,7 @@ class Servo:
 	_max: int
 
 	def __init__(self, p: Pin, freq: int = 50,
-		min_duty: int = 1_000_000, max_duty: int = 1_000_000):
+		min_duty: int = 1_000_000, max_duty: int = 2_000_000):
 		self._p = PWM(p, freq=freq)
 		self._min = min_duty
 		self._max = max_duty
