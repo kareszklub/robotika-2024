@@ -35,7 +35,7 @@ server_sock.connect((cfg['network']['server_ip'], cfg['network']['server_port'])
 recv_buffer = bytearray()
 def recv_exact(sock: socket, buffer: bytearray, n: int):
 	while n > 0:
-		n -= socket.recv_into(buffer, n)
+		n -= sock.recv_into(buffer, n)
 
 recv_exact(server_sock, recv_buffer, 1)
 robot_id = struct.unpack('!H', recv_buffer)
