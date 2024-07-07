@@ -1,0 +1,65 @@
+{
+	"network": {
+		"country": "hu",
+		"hostname": "testrobot",
+
+		"ssid": "N1G",
+		"password": "Le_Sz4r.0m",
+		"attempts": 5,
+
+		"debug_ip": "123.456.789.000",
+		"debug_port": 123,
+		
+		"server_ip": "123.456.789.000",
+		"server_port": 123
+	},
+
+	"rgb_sensor": {
+		"i2c_chan": 0,
+		"sda": 20,
+		"scl": 21,
+		"led": 19,
+		"int": null,
+
+		"integration_time": 40,
+		"gain": 3
+	},
+
+	"rgb_led": {
+		"r": 13,
+		"g": 15,
+		"b": 14,
+
+		"freq": 2000
+	},
+
+	"ultra_sensor": {
+		"trig": 0,
+		"echo": 1
+	},
+
+	"servo": {
+		"pin": 6,
+		"freq": 50,
+
+		"min_duty": 570000,
+		"max_duty": 2420000
+	},
+
+	"h_bridge": {
+		"pwm_l": 12,
+		"in_l_1": 11,
+		"in_l_2": 10,
+
+		"pwm_r": 18,
+		"in_r_1": 17,
+		"in_r_2": 16,
+
+		"freq": 2000
+	},
+
+	"buzzer": {
+		"pin": 9,
+		"freq": 2000
+	}
+}
