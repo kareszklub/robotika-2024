@@ -1,27 +1,23 @@
 
-def clamp(f: float, mn: float, mx: float) -> float:
+def clamp[T](f: T, mn: T, mx: T) -> T:
 	if f < mn:
 		return mn
 	if f > mx:
 		return mx
 	return f
 
-def rgb_rel(crgb: tuple[int, int, int, int]) -> tuple[float, float, float]:
-    c, r, g, b = crgb
-
+def rgb_rel(c: int, r: int, g: int, b: int) -> tuple[float, float, float]:
     if c == 0:
         return 0, 0, 0
     return r / c, g / c, b / c
 
-def rgb_to_hsv(rgb: tuple[float, float, float]) -> tuple[float, float, float]:
+def rgb_to_hsv(r: float, g: float, b: float) -> tuple[float, float, float]:
     '''HSV to RGB
 
     h: 0.0 - 360.0
     s: 0.0 - 1.0
     v: 0.0 - 1.0
     '''
-
-    r, g, b = rgb
 
     cmax = max(r, g, b)
     cmin = min(r, g, b)

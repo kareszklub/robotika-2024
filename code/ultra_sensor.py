@@ -1,7 +1,7 @@
 from time import sleep_us, ticks_us, ticks_diff
 from machine import Pin
 
-CM_PER_US = const(1 / (343 * 1000))
+CM_PER_US = const(0.01715)
 
 class UltraSensor:
     _trig: Pin
