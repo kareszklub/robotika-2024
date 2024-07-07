@@ -1,4 +1,5 @@
 from machine import Pin, PWM
+from utils import clamp
 
 class HBridge:
 	_r_pwm: PWM
@@ -23,6 +24,9 @@ class HBridge:
 		self._r_2 = r_2
 
 	def drive(self, l: float, r: float):
+		l = clamp(l, -1, 1)
+		r = clamp(r, -1, 1)
+
 		self._l_1.value(l < 0)
 		self._l_2.value(l > 0)
 		self._l_pwm.duty_u16(int(abs(l) * 0xffff))
