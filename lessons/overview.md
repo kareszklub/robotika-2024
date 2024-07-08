@@ -11,7 +11,6 @@
   - mpremote
 - uPy firmware upload
 - Hello World / uPy basics
-- ?git?
 - uC basics (pins)
 - builtin led
 - breadboard
@@ -19,6 +18,7 @@
   - pwm
 - rgb led
   - electronics basics
+- ?git?
 
 ## Lesson #2
 
@@ -40,7 +40,9 @@
 
 ## Lesson #4
 
-- interrupts blah blah
+- interrupts
+  - reset button
+  - proximity sensor
 - PID (faltól x távolság)
 - wall hugging
 

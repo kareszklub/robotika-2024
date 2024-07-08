@@ -2,7 +2,7 @@ from _thread import start_new_thread
 from time import sleep_ms
 from machine import Pin
 
-from sernsor_thread import sensor_thread_main, Sensors
+from sensor_thread import sensor_thread_main, Sensors
 from h_bridge import HBridge
 from rgb_led import RgbLed
 from buzzer import Buzzer

@@ -66,7 +66,7 @@ def sensor_thread_main(data: Sensors):
         data.dist = ultra.measure_sync()
         data.lock.release()
 
-        t_diff = POLL_DELAY_US - ticks_diff(ticks_us(), start) / 1000
+        t_diff = round(POLL_DELAY_US - ticks_diff(ticks_us(), start) / 1000)
         if t_diff > 0:
             sleep_us(t_diff)
 
