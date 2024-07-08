@@ -31,13 +31,6 @@ async fn process_socket(mut socket: TcpStream, tx: Tx) -> anyhow::Result<()> {
                 debug!("msg: {msg}");
                 tx.send(msg)?;
             }
-
-            // exit
-            0 => {
-                info!("client disconnected");
-                return Ok(());
-            }
-
             _ => (),
         }
     }
