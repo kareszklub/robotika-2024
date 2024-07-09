@@ -13,9 +13,12 @@ pub async fn init() -> anyhow::Result<()> {
         .route("/static/*file", get(static_handler));
 
     let addr = "0.0.0.0:8080";
+
     let listener = tokio::net::TcpListener::bind(&addr).await?;
     info!("Listening on {addr}");
+
     axum::serve(listener, router).await?;
+
     Ok(())
 }
 
@@ -37,6 +40,7 @@ where
                 let mime = mime_guess::from_path(path).first_or_octet_stream();
                 ([(header::CONTENT_TYPE, mime.as_ref())], content.data).into_response()
             }
+
             None => (StatusCode::NOT_FOUND, "404 Not Found").into_response(),
         }
     }

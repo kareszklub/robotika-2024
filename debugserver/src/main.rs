@@ -1,5 +1,6 @@
 mod debug;
 mod http;
+mod message;
 mod templates;
 
 #[macro_use]
@@ -12,14 +13,17 @@ async fn main() -> anyhow::Result<()> {
     if env::var("RUST_LOG").is_err() {
         env::set_var("RUST_LOG", "debugserver=debug");
     }
+
     pretty_env_logger::init();
 
-    let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
+    let (msg_tx, msg_rx) = tokio::sync::mpsc::unbounded_channel();
+    let (res_tx, res_rx) = tokio::sync::mpsc::unbounded_channel();
 
-    let debug_task = tokio::task::spawn(async { debug::init(tx).await });
+    let debug_task = tokio::task::spawn(async { debug::init(msg_tx, res_rx).await });
     let http_task = tokio::task::spawn(async { http::init().await });
 
-    let _res = tokio::try_join!(flatten(http_task), flatten(debug_task))?;
+    let _ = tokio::try_join!(flatten(http_task), flatten(debug_task))?;
+
     Ok(())
 }
 
