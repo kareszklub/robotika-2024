@@ -2,7 +2,7 @@
 
 ## Lesson #1
 
-- mit fogunk megépíteni
+- what are we going to build?
   - motor rpm, torque, max speed
   - 3d modell - dapa?
 - dev env setup (TODO: mail!)
@@ -31,11 +31,11 @@
 
 ## Lesson #3
 
-- rgb szenzor
+- rgb sensor
   - i2c
 - color identification
 
-- multithreading
+- multi threading
   - separate sensor / control loop
 
 ## Lesson #4
@@ -43,7 +43,7 @@
 - interrupts
   - reset button
   - proximity sensor
-- PID (faltól x távolság)
+- PID (maintain distance from wall)
 - wall hugging
 
 ## Lesson #5
@@ -53,14 +53,14 @@
 ## Lesson #6
 
 - networking basics
-  - tcp/ip
-- reimplement debug
+  - tcp/ ip
+- re-implement debug
 
 ## Lesson #7
 
 - extras
   - power management
-  - udp / http
+  - udp/http
   - dependencies
   - floating point error
   - mutex vs channel
