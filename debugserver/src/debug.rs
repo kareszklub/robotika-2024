@@ -1,31 +1,29 @@
+use crate::message::Control;
 use anyhow::anyhow;
 use tokio::{
     io::{AsyncReadExt, BufStream},
     net::{TcpListener, TcpStream},
-    sync::mpsc::{UnboundedReceiver, UnboundedSender},
 };
 
-use crate::message::{Control, ControlValue, Message};
+type Tx = tokio::sync::broadcast::Sender<String>;
 
-type Tx = UnboundedSender<Message>;
-type Rx = UnboundedReceiver<ControlValue>;
-
-pub async fn init(mut tx: Tx, mut rx: Rx) -> anyhow::Result<()> {
+pub async fn init(mut tx: Tx) -> anyhow::Result<()> {
     let listener = TcpListener::bind("0.0.0.0:9999").await?;
 
     loop {
         let (socket, _) = listener.accept().await?;
 
-        if let Err(e) = process_socket(socket, &mut tx, &mut rx).await {
+        // will "block" this loop for the socket, meaning maximum one pico will be handled at any time
+        if let Err(e) = process_socket(socket, &mut tx).await {
             error!("error while processing debug socket: {e}");
         }
     }
 }
 
-async fn process_socket(socket: TcpStream, tx: &mut Tx, rx: &mut Rx) -> anyhow::Result<()> {
+async fn process_socket(socket: TcpStream, tx: &mut Tx) -> anyhow::Result<()> {
     let mut socket = BufStream::new(socket);
-
     let mut buf = Vec::new();
+
     loop {
         let mtype = socket.read_u8().await?;
 
@@ -40,7 +38,7 @@ async fn process_socket(socket: TcpStream, tx: &mut Tx, rx: &mut Rx) -> anyhow::
                 let msg = String::from_utf8(buf.clone())?;
                 debug!("msg: {msg}");
 
-                tx.send(Message::Print(msg))?;
+                tx.send(msg)?;
             }
 
             // 2: define controls
@@ -52,16 +50,7 @@ async fn process_socket(socket: TcpStream, tx: &mut Tx, rx: &mut Rx) -> anyhow::
                     ctrls.push(Control::read(&mut socket).await?);
                 }
 
-                tx.send(Message::DefineControls(ctrls))?;
-            }
-
-            // 3: get control value
-            3 => {
-                let c = socket.read_u8().await?;
-                tx.send(Message::GetControlValue(c))?;
-
-                let v = rx.recv().await.ok_or(anyhow!("No response??"))?;
-                v.write(&mut socket).await?;
+                // TODO: handle unprompted controls
             }
 
             t => Err(anyhow!("Invalid message type {t}"))?,

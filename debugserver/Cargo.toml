@@ -7,9 +7,15 @@ edition = "2021"
 anyhow = "1.0.86"
 askama = "0.12.1"
 askama_axum = "0.4.0"
+async-stream = "0.3.5"
 axum = "0.7.5"
+futures-util = "0.3.30"
 log = "0.4.22"
 mime_guess = "2.0.5"
 pretty_env_logger = "0.5.0"
 rust-embed = { version = "8.4.0", features = ["axum"] }
 tokio = { version = "1.38.0", features = ["full"] }
+
+
+[profile.dev.package.askama_derive]
+opt-level = 3

@@ -1,12 +1,18 @@
 mod debug;
 mod http;
 mod message;
-mod templates;
+pub mod templates;
 
 #[macro_use]
 extern crate log;
 use std::env;
-use tokio::task::JoinHandle;
+use tokio::{
+    io::AsyncWriteExt,
+    sync::broadcast::{Receiver, Sender},
+    task::JoinHandle,
+};
+
+type Tx = Sender<String>;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -16,13 +22,16 @@ async fn main() -> anyhow::Result<()> {
 
     pretty_env_logger::init();
 
-    let (msg_tx, msg_rx) = tokio::sync::mpsc::unbounded_channel();
-    let (res_tx, res_rx) = tokio::sync::mpsc::unbounded_channel();
+    let (msg_tx, msg_rx) = tokio::sync::broadcast::channel(1024);
 
-    let debug_task = tokio::task::spawn(async { debug::init(msg_tx, res_rx).await });
-    let http_task = tokio::task::spawn(async { http::init().await });
+    let file_task = tokio::task::spawn(log_file(msg_rx));
+    let debug_task = tokio::task::spawn({
+        let tx = msg_tx.clone();
+        debug::init(tx)
+    });
+    let http_task = tokio::task::spawn(http::init(msg_tx));
 
-    let _ = tokio::try_join!(flatten(http_task), flatten(debug_task))?;
+    let _ = tokio::try_join!(flatten(file_task), flatten(http_task), flatten(debug_task))?;
 
     Ok(())
 }
@@ -33,4 +42,18 @@ async fn flatten<T>(handle: JoinHandle<anyhow::Result<T>>) -> anyhow::Result<T> 
         Ok(Err(err)) => Err(err),
         Err(err) => anyhow::Result::Err(err.into()),
     }
+}
+
+async fn log_file(mut rx: Receiver<String>) -> anyhow::Result<()> {
+    let mut file = tokio::fs::File::options()
+        .create(true)
+        .append(true)
+        .open("debugserver.log")
+        .await?;
+
+    while let Ok(msg) = rx.recv().await {
+        file.write_all((msg + "\n").as_bytes()).await?;
+    }
+
+    Ok(())
 }
