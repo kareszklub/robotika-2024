@@ -1,10 +1,9 @@
 use tokio::{
     io::AsyncReadExt,
     net::{TcpListener, TcpStream},
-    sync::mpsc::UnboundedSender,
 };
 
-type Tx = UnboundedSender<String>;
+use crate::Tx;
 
 pub async fn init(tx: Tx) -> anyhow::Result<()> {
     let listener = TcpListener::bind("0.0.0.0:9999").await?;

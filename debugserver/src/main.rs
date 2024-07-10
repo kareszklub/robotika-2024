@@ -5,7 +5,9 @@ mod templates;
 #[macro_use]
 extern crate log;
 use std::env;
-use tokio::task::JoinHandle;
+use tokio::{sync::broadcast::Sender, task::JoinHandle};
+
+type Tx = Sender<String>;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -14,10 +16,13 @@ async fn main() -> anyhow::Result<()> {
     }
     pretty_env_logger::init();
 
-    let (tx, rx) = tokio::sync::mpsc::unbounded_channel();
+    let (tx, _rx) = tokio::sync::broadcast::channel(1024);
 
-    let debug_task = tokio::task::spawn(async { debug::init(tx).await });
-    let http_task = tokio::task::spawn(async { http::init().await });
+    let debug_task = tokio::task::spawn({
+        let tx = tx.clone();
+        async { debug::init(tx).await }
+    });
+    let http_task = tokio::task::spawn(async { http::init(tx).await });
 
     let _res = tokio::try_join!(flatten(http_task), flatten(debug_task))?;
     Ok(())
