@@ -60,12 +60,6 @@ impl Control {
     }
 }
 
-pub enum Message {
-    Print(String),
-    DefineControls(Vec<Control>),
-    GetControlValue(u8),
-}
-
 pub enum ControlValue {
     Bool(bool),
     Float(f32),

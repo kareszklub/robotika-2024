@@ -9,3 +9,9 @@ impl Index {
         Self {}
     }
 }
+
+#[derive(Template)]
+#[template(path = "msg.html")]
+pub struct Msg {
+    msg: String,
+}

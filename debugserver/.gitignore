@@ -1,3 +1,4 @@
 target/
 deps/
 tailwind.bin
+debugserver.log

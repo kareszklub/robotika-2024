@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-import socket, struct
+import socket, struct, time
 
 HOST = "127.0.0.1"
 PORT = 9999
@@ -15,7 +15,14 @@ def send(_msg: str):
     s.sendall(msg)
 
 
-send("buffher?")
-send("i barely know her")
+# send("buffher?")
+# send("i barely know her")
+
+i = 0
+while True:
+    send(f"bruh moment numero {i}")
+    i += 1
+    time.sleep(1)
+
 
 s.close()
