@@ -1,7 +1,7 @@
 from time import sleep_us, ticks_us, ticks_diff
 from machine import Pin
 
-CM_PER_US = const(0.01715)
+M_PER_US = const(0.0001715)
 
 class UltraSensor:
     _trig: Pin
@@ -27,6 +27,6 @@ class UltraSensor:
                 return None
 
         dur_us = ticks_diff(ticks_us(), start)
-        cm = dur_us * CM_PER_US
+        cm = dur_us * M_PER_US
     
-        return cm if cm <= 300 else None
+        return cm if cm <= 3 else None
