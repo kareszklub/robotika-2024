@@ -59,10 +59,10 @@ def sensor_thread_main(data: Sensors):
         start = ticks_us()
 
         raw_rgb = rgb.get_data()
-        rel_rgb = rgb_rel(raw_rgb)
+        rel_rgb = rgb_rel(*raw_rgb)
 
         data.lock.acquire()
-        data.hsv = rgb_to_hsv(rel_rgb)
+        data.hsv = rgb_to_hsv(*rel_rgb)
         data.dist = ultra.measure_sync()
         data.lock.release()
 
