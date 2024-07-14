@@ -1,5 +1,5 @@
 
-def clamp[T](f: T, mn: T, mx: T) -> T:
+def clamp(f, mn, mx):
 	if f < mn:
 		return mn
 	if f > mx:
@@ -40,3 +40,26 @@ def rgb_to_hsv(r: float, g: float, b: float) -> tuple[float, float, float]:
     v = cmax * 100
 
     return h, s, v
+
+def hsv_to_rgb(h: float, s: float, v: float) -> tuple[float, float, float]:
+    h %= 360
+
+    c = v * s
+    x = c * (1 - abs((h / 60) % 2 - 1))
+    m = v - c
+
+    if 0 <= h and h < 60:
+        rgb = c, x, 0
+    elif 60 <= h and h < 120:
+        rgb = x, c, 0
+    elif 120 <= h and h < 180:
+        rgb = 0, c, x
+    elif 180 <= h and h < 240:
+        rgb = 0, x, c
+    elif 240 <= h and h < 300:
+        rgb = x, 0, c
+    else:
+        rgb = c, 0, x
+
+    r, g, b = rgb
+    return r + m, g + m, b + m
