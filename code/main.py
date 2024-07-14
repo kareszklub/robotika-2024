@@ -15,7 +15,7 @@ from config import cfg
 
 def main():
     print("starting up")
-    
+
     sensor_data = Sensors()
     start_new_thread(sensor_thread_main, (sensor_data))
 
@@ -60,7 +60,7 @@ def main():
     while i < secs * 5:
         sensor_data.lock.acquire()
         dist = sensor_data.dist
-        col = rgb_rel(*sensor_data.rgb)
+        col = sensor_data.rgb
         sensor_data.lock.release()
 
         rgb_led.set_color(*col)
