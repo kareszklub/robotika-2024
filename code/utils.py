@@ -1,10 +1,10 @@
 
 def clamp(f, mn, mx):
-	if f < mn:
-		return mn
-	if f > mx:
-		return mx
-	return f
+    if f < mn:
+        return mn
+    if f > mx:
+        return mx
+    return f
 
 def rgb_rel(c: int, r: int, g: int, b: int) -> tuple[float, float, float]:
     if c == 0:
