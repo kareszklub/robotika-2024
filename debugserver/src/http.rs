@@ -44,8 +44,14 @@ async fn sse_handler(
     let mut id = 0u32;
     let stream = async_stream::stream! {
         while let Ok(msg) = rx.recv().await {
-            id += 1;
+            let msg = if id == 0 {
+                format!("<p hx-swap-oob=\"outerHTML:#logs-placeholder\">{msg}</p>")
+            } else {
+                format!("<p>{msg}</p>")
+            };
+
             yield Ok(Event::default().event("log").id(&id.to_string()).data(msg));
+            id += 1;
         }
     };
     Sse::new(stream).keep_alive(KeepAlive::default())

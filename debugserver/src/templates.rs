@@ -3,15 +3,9 @@ use askama_axum::IntoResponse;
 
 #[derive(Template)]
 #[template(path = "index.html")]
-pub struct Index {}
+pub struct Index;
 impl Index {
     pub async fn get() -> impl IntoResponse {
-        Self {}
+        Self
     }
-}
-
-#[derive(Template)]
-#[template(path = "msg.html")]
-pub struct Msg {
-    msg: String,
 }
