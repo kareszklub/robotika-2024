@@ -20,7 +20,7 @@ pub async fn init(state: Arc<AppState>) -> anyhow::Result<()> {
         hs.insert(
             "cock".into(),
             Control::String {
-                default: String::from("balls"),
+                value: String::from("balls"),
             },
         );
     }

@@ -1,11 +1,14 @@
-use crate::{message::Control, AppState, SseMessage};
+use crate::{
+    message::{read_string, write_string, Control},
+    AppState, SseMessage,
+};
 use anyhow::anyhow;
 use std::{
     collections::{hash_map::Entry, HashMap},
     sync::Arc,
 };
 use tokio::{
-    io::{AsyncReadExt, BufStream},
+    io::{AsyncReadExt, AsyncWriteExt, BufStream},
     net::{TcpListener, TcpStream},
 };
 
@@ -32,12 +35,7 @@ async fn process_socket(socket: TcpStream, state: &AppState) -> anyhow::Result<(
         match mtype {
             // 1: debug message
             1 => {
-                let len = socket.read_u16().await? as usize;
-
-                buf.resize(len, 0);
-                socket.read_exact(&mut buf).await?;
-
-                let msg = String::from_utf8(buf.clone())?;
+                let msg = read_string(&mut socket, &mut buf).await?;
                 debug!("msg: {msg}");
 
                 state.msg_tx.send(SseMessage::Log(msg))?;
@@ -46,13 +44,12 @@ async fn process_socket(socket: TcpStream, state: &AppState) -> anyhow::Result<(
             // 2: define controls
             2 => {
                 let len = socket.read_u16().await? as usize;
-                // let mut ctrls = Vec::with_capacity(len);
-                // for _ in 0..len {
-                //     ctrls.push(Control::read(&mut socket).await?);
-                // }
 
-                // TODO: construct hashmap from socket
-                let ctrls: HashMap<String, Control> = HashMap::new();
+                let mut ctrls: HashMap<String, Control> = HashMap::new();
+                for _ in 0..len {
+                    let name = read_string(&mut socket, &mut buf).await?;
+                    ctrls.insert(name, Control::read(&mut socket).await?);
+                }
 
                 let mut hs = state.config.write().await;
 
@@ -65,9 +62,11 @@ async fn process_socket(socket: TcpStream, state: &AppState) -> anyhow::Result<(
                         Entry::Vacant(entry) => {
                             entry.insert(control);
                         }
+
                         // override already exists
-                        Entry::Occupied(_) => {
-                            // TODO: send 0x01 to pico
+                        Entry::Occupied(entry) => {
+                            write_string(&mut socket, entry.key()).await?;
+                            entry.get().write(&mut socket).await?;
                         }
                     };
                 }
