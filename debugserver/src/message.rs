@@ -1,5 +1,6 @@
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
+#[derive(Debug, Clone)]
 pub enum Control {
     Bool { default: bool },
     Float { default: f32, min: f32, max: f32 },

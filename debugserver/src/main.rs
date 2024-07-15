@@ -5,14 +5,29 @@ pub mod templates;
 
 #[macro_use]
 extern crate log;
-use std::env;
+use message::Control;
+use std::{collections::HashMap, env, sync::Arc};
 use tokio::{
     io::AsyncWriteExt,
-    sync::broadcast::{Receiver, Sender},
+    sync::{
+        broadcast::{Receiver, Sender},
+        RwLock,
+    },
     task::JoinHandle,
 };
 
-type Tx = Sender<String>;
+pub type Config = HashMap<String, Control>;
+
+#[derive(Debug, Clone)]
+enum SseMessage {
+    Log(String),
+    ControlsChanged,
+}
+
+pub struct AppState {
+    pub msg_tx: Sender<SseMessage>,
+    pub config: RwLock<Config>,
+}
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -24,12 +39,14 @@ async fn main() -> anyhow::Result<()> {
 
     let (msg_tx, msg_rx) = tokio::sync::broadcast::channel(1024);
 
-    let file_task = tokio::task::spawn(log_file(msg_rx));
-    let debug_task = tokio::task::spawn({
-        let tx = msg_tx.clone();
-        debug::init(tx)
+    let state = Arc::new(AppState {
+        msg_tx,
+        config: Default::default(),
     });
-    let http_task = tokio::task::spawn(http::init(msg_tx));
+
+    let file_task = tokio::task::spawn(log_file(msg_rx));
+    let debug_task = tokio::task::spawn(debug::init(state.clone()));
+    let http_task = tokio::task::spawn(http::init(state));
 
     let _ = tokio::try_join!(flatten(file_task), flatten(http_task), flatten(debug_task))?;
 
@@ -44,7 +61,7 @@ async fn flatten<T>(handle: JoinHandle<anyhow::Result<T>>) -> anyhow::Result<T> 
     }
 }
 
-async fn log_file(mut rx: Receiver<String>) -> anyhow::Result<()> {
+async fn log_file(mut rx: Receiver<SseMessage>) -> anyhow::Result<()> {
     let mut file = tokio::fs::File::options()
         .create(true)
         .append(true)
@@ -52,7 +69,9 @@ async fn log_file(mut rx: Receiver<String>) -> anyhow::Result<()> {
         .await?;
 
     while let Ok(msg) = rx.recv().await {
-        file.write_all((msg + "\n").as_bytes()).await?;
+        if let SseMessage::Log(msg) = msg {
+            file.write_all((msg + "\n").as_bytes()).await?;
+        }
     }
 
     Ok(())
