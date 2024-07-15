@@ -2,38 +2,38 @@ use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
 #[derive(Debug, Clone)]
 pub enum Control {
-    Bool { default: bool },
-    Float { default: f32, min: f32, max: f32 },
-    Int { default: i64, min: i64, max: i64 },
-    String { default: String },
+    Bool { value: bool },
+    Float { value: f32, min: f32, max: f32 },
+    Int { value: i64, min: i64, max: i64 },
+    String { value: String },
 }
 impl Control {
-    pub async fn read<A>(w: &mut A) -> tokio::io::Result<Self>
+    pub async fn read<W>(w: &mut W) -> tokio::io::Result<Self>
     where
-        A: AsyncReadExt + Unpin,
+        W: AsyncReadExt + Unpin,
     {
         let t = w.read_u8().await?;
         Ok(match t {
             // bool:
             0 => {
-                let default = w.read_u8().await? != 0;
-                Self::Bool { default }
+                let value = w.read_u8().await? != 0;
+                Self::Bool { value }
             }
 
             // float:
             1 => {
-                let default = w.read_f32().await?;
+                let value = w.read_f32().await?;
                 let min = w.read_f32().await?;
                 let max = w.read_f32().await?;
-                Self::Float { default, min, max }
+                Self::Float { value, min, max }
             }
 
             // int:
             2 => {
-                let default = w.read_i64().await?;
+                let value = w.read_i64().await?;
                 let min = w.read_i64().await?;
                 let max = w.read_i64().await?;
-                Self::Int { default, min, max }
+                Self::Int { value, min, max }
             }
 
             // string:
@@ -43,14 +43,14 @@ impl Control {
                 let mut buf = vec![0; len];
                 w.read_exact(&mut buf).await?;
 
-                let default = String::from_utf8(buf).map_err(|_| {
+                let value = String::from_utf8(buf).map_err(|_| {
                     tokio::io::Error::new(
                         std::io::ErrorKind::InvalidData,
                         format!("Invalid control type {t}"),
                     )
                 })?;
 
-                Self::String { default }
+                Self::String { value }
             }
 
             _ => Err(tokio::io::Error::new(
@@ -59,30 +59,43 @@ impl Control {
             ))?,
         })
     }
-}
 
-pub enum ControlValue {
-    Bool(bool),
-    Float(f32),
-    Int(i64),
-    String(String),
-}
-
-impl ControlValue {
-    pub async fn write<A>(&self, w: &mut A) -> tokio::io::Result<()>
+    pub async fn write<W>(&self, w: &mut W) -> tokio::io::Result<()>
     where
-        A: AsyncWriteExt + Unpin,
+        W: AsyncWriteExt + Unpin,
     {
         match self {
-            ControlValue::Bool(v) => w.write_all(&(*v as u8).to_be_bytes()).await?,
-            ControlValue::Float(v) => w.write_all(&v.to_be_bytes()).await?,
-            ControlValue::Int(v) => w.write_all(&v.to_be_bytes()).await?,
-            ControlValue::String(v) => {
-                w.write_all(&(v.len() as u16).to_be_bytes()).await?;
-                w.write_all(v.as_bytes()).await?
-            }
+            Control::Bool { value } => w.write_u8(*value as u8).await,
+            Control::Float { value, .. } => w.write_f32(*value).await,
+            Control::Int { value, .. } => w.write_i64(*value).await,
+            Control::String { value } => write_string(w, &value).await,
         }
-
-        Ok(())
     }
+}
+
+pub async fn read_string<R>(w: &mut R, buf: &mut Vec<u8>) -> tokio::io::Result<String>
+where
+    R: AsyncReadExt + Unpin,
+{
+    let len = w.read_u16().await? as usize;
+
+    if buf.capacity() < len {
+        buf.reserve(len - buf.capacity());
+    }
+    w.read_exact(buf).await?;
+
+    let name = String::from_utf8(buf.clone())
+        .map_err(|_| tokio::io::Error::new(std::io::ErrorKind::InvalidData, "Not valid utf-8"))?;
+
+    Ok(name)
+}
+
+pub async fn write_string<W>(w: &mut W, s: &str) -> tokio::io::Result<()>
+where
+    W: AsyncWriteExt + Unpin,
+{
+    w.write_u16(s.len() as u16).await?;
+    w.write_all(s.as_bytes()).await?;
+
+    Ok(())
 }
