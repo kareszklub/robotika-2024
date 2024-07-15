@@ -3,13 +3,18 @@
     <head>
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="/static/style.css" media="all">
         <script src="/static/htmx.min.js"></script>
         <script src="/static/sse.min.js"></script>
-        <link rel="stylesheet" href="/static/style.css" media="all">
         <title></title>
     </head>
-    <body class="h-full bg-teal-950">
-        <div hx-ext="sse" sse-connect="/logs/stream" sse-swap="log" hx-swap="afterend"
-        class="text-white">no logs yet</div>
+    <body class="h-full bg-teal-950 flex flex-col md:flex-row justify-between md:justify-evenly gap-16">
+        <div id="logs" class="text-white bg-stone-950 overflow-scroll h-full md:h-80 w-full"><samp>
+            <div hx-ext="sse" sse-connect="/logs/stream" sse-swap="log" hx-swap="beforeend scroll:#logs:bottom">
+                <p id="logs-placeholder">no logs yet</p>
+            </div>
+        </samp></div>
+
+        <div id="controls">controls are here</div>
     </body>
 </html>
