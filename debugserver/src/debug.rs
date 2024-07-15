@@ -8,24 +8,32 @@ use std::{
     sync::Arc,
 };
 use tokio::{
-    io::{AsyncReadExt, AsyncWriteExt, BufStream},
+    io::{AsyncReadExt, BufStream},
     net::{TcpListener, TcpStream},
+    sync::mpsc::UnboundedReceiver,
 };
 
-pub async fn init(state: Arc<AppState>) -> anyhow::Result<()> {
+pub async fn init(
+    state: Arc<AppState>,
+    ctrl_rx: UnboundedReceiver<(String, Control)>,
+) -> anyhow::Result<()> {
     let listener = TcpListener::bind("0.0.0.0:9999").await?;
 
     loop {
         let (socket, _) = listener.accept().await?;
 
         // will "block" this loop for the socket, meaning maximum one pico will be handled at any time
-        if let Err(e) = process_socket(socket, &state).await {
+        if let Err(e) = process_socket(socket, &state, &ctrl_rx).await {
             error!("error while processing debug socket: {e}");
         }
     }
 }
 
-async fn process_socket(socket: TcpStream, state: &AppState) -> anyhow::Result<()> {
+async fn process_socket(
+    socket: TcpStream,
+    state: &AppState,
+    ctrl_rx: &UnboundedReceiver<(String, Control)>,
+) -> anyhow::Result<()> {
     let mut socket = BufStream::new(socket);
     let mut buf = Vec::new();
 

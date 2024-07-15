@@ -1,7 +1,7 @@
 mod debug;
 mod http;
 mod message;
-pub mod templates;
+mod templates;
 
 #[macro_use]
 extern crate log;
@@ -11,6 +11,7 @@ use tokio::{
     io::AsyncWriteExt,
     sync::{
         broadcast::{Receiver, Sender},
+        mpsc::UnboundedSender,
         RwLock,
     },
     task::JoinHandle,
@@ -19,13 +20,14 @@ use tokio::{
 pub type Config = HashMap<String, Control>;
 
 #[derive(Debug, Clone)]
-enum SseMessage {
+pub(crate) enum SseMessage {
     Log(String),
     ControlsChanged,
 }
 
-pub struct AppState {
+pub(crate) struct AppState {
     pub msg_tx: Sender<SseMessage>,
+    pub ctrl_tx: UnboundedSender<(String, Control)>,
     pub config: RwLock<Config>,
 }
 
@@ -38,14 +40,16 @@ async fn main() -> anyhow::Result<()> {
     pretty_env_logger::init();
 
     let (msg_tx, msg_rx) = tokio::sync::broadcast::channel(1024);
+    let (ctrl_tx, ctrl_rx) = tokio::sync::mpsc::unbounded_channel();
 
     let state = Arc::new(AppState {
         msg_tx,
+        ctrl_tx,
         config: Default::default(),
     });
 
     let file_task = tokio::task::spawn(log_file(msg_rx));
-    let debug_task = tokio::task::spawn(debug::init(state.clone()));
+    let debug_task = tokio::task::spawn(debug::init(state.clone(), ctrl_rx));
     let http_task = tokio::task::spawn(http::init(state));
 
     let _ = tokio::try_join!(flatten(file_task), flatten(http_task), flatten(debug_task))?;
