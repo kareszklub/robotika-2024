@@ -15,6 +15,8 @@
             </div>
         </samp></div>
 
-        <div id="controls">controls are here: {{ config.len() }}</div>
+{# {% include "controls.html" %} #}
+        {{controls|safe}}
     </body>
 </html>
+{# vim:set ft=htmldjango: #}

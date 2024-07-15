@@ -79,9 +79,7 @@ where
 {
     let len = w.read_u16().await? as usize;
 
-    if buf.capacity() < len {
-        buf.reserve(len - buf.capacity());
-    }
+    buf.resize(len, 0);
     w.read_exact(buf).await?;
 
     let name = String::from_utf8(buf.clone())

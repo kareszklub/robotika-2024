@@ -26,7 +26,11 @@ pub async fn init(state: Arc<AppState>) -> anyhow::Result<()> {
     }
 
     let router = Router::new()
-        .route("/", get(templates::index))
+        .route("/", get(templates::Index::get))
+        .route(
+            "/controls",
+            get(templates::Controls::get).post(templates::Controls::post),
+        )
         .route("/logs/stream", get(sse_handler))
         .route("/static/*file", get(static_handler))
         .with_state(state);
@@ -42,7 +46,7 @@ pub async fn init(state: Arc<AppState>) -> anyhow::Result<()> {
 }
 
 async fn sse_handler(
-    state: State<Arc<AppState>>,
+    State(state): State<Arc<AppState>>,
 ) -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
     let mut rx = state.msg_tx.subscribe();
     let mut id = 0u32;

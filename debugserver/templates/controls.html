@@ -1,0 +1,18 @@
+<div id="controls">
+    {% for (name, control) in config %}
+    <label>
+        {{ name }}
+        {% match control %}
+        {% when Control::Bool with { value } %}
+        <input type="checkbox" id="{{name}}" name="{{name}}" {% if value %}checked{% endif %}>
+        {% when Control::Float with { value, min, max }%}
+        <input type="range" id="{{name}}" name="{{name}}" value="{{value}}" min="{{min}}" max="{{max}}" step="0.01">
+        {% when Control::Int with { value, min, max }%}
+        <input type="range" id="{{name}}" name="{{name}}" value="{{value}}" min="{{min}}" max="{{max}}" step="1">
+        {% when Control::String with { value } %}
+        <input type="text" id="{{name}}" name="{{name}}" value="{{value}}" hx-post="/controls">
+        {% endmatch %}
+    </label>
+    {% endfor %}
+</div>
+{# vim:set ft=htmldjango: #}
