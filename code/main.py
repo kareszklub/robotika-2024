@@ -22,7 +22,9 @@ def main():
     rgb_led = RgbLed(
         Pin(cfg['rgb_led']['r'], Pin.OUT),
         Pin(cfg['rgb_led']['g'], Pin.OUT),
-        Pin(cfg['rgb_led']['b'], Pin.OUT)
+        Pin(cfg['rgb_led']['b'], Pin.OUT),
+
+        cfg['rgb_led']['freq']
     )
 
     servo = Servo(
@@ -31,6 +33,7 @@ def main():
         cfg['servo']['freq'],
 
         cfg['servo']['min_duty'],
+        cfg['servo']['mid_duty'],
         cfg['servo']['max_duty']
     )
 
@@ -76,7 +79,7 @@ def main():
 
     sensor_data.sleep = True
 
-    h_bridge.drive(0, 0)
+    h_bridge.off()
     buzzer.off()
     servo.off()
     rgb_led.off()

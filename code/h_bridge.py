@@ -46,3 +46,9 @@ class HBridge:
     def set_freq(self, freq: int):
         self._l_pwm.freq(freq)
         self._r_pwm.freq(freq)
+
+    def off(self):
+        self.drive(0, 0)
+
+        self._l_pwm.deinit()
+        self._r_pwm.deinit()
