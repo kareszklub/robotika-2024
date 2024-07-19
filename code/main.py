@@ -2,22 +2,19 @@ from _thread import start_new_thread
 from time import sleep_ms
 from machine import Pin
 
-from sensor_thread import sensor_thread_main, Sensors
 from h_bridge import HBridge
 from rgb_led import RgbLed
 from buzzer import Buzzer
 from servo import Servo
 
+from sensor_thread import sensor_thread_main, Sensors
+from debug import define_controls, dprint
+from networking import setup_wifi
 from utils import rgb_rel
-
-from networking import robot_id
 from config import cfg
 
 def main():
     print("starting up")
-
-    sensor_data = Sensors()
-    start_new_thread(sensor_thread_main, (sensor_data))
 
     rgb_led = RgbLed(
         Pin(cfg['rgb_led']['r'], Pin.OUT),
@@ -55,7 +52,13 @@ def main():
 
     led_builtin = Pin("LED", Pin.OUT)
 
-    print("done with initalization")
+    setup_wifi()
+    define_controls()
+
+    sensor_data = Sensors()
+    start_new_thread(sensor_thread_main, (sensor_data))
+
+    dprint("done with initalization")
 
     i = 0
     secs = 3
@@ -69,13 +72,13 @@ def main():
         rgb_led.set_color(*col)
 
         col = (int(0xff * col[0]), int(0xff * col[1]), int(0xff * col[2]))
-        print(f'{i};{col};{dist}')
+        dprint(f'{i};{col};{dist}')
 
         i += 1
         led_builtin.toggle()
         sleep_ms(100)
 
-    print('done')
+    dprint('done')
 
     sensor_data.sleep = True
 
@@ -83,7 +86,6 @@ def main():
     buzzer.off()
     servo.off()
     rgb_led.off()
-
 
 if __name__ == '__main__':
     main()

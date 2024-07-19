@@ -4,39 +4,55 @@ from time import sleep
 from config import cfg
 import struct
 
-if 'country' in cfg['network']:
-    country(cfg['network']['country'])
+def setup_wifi():
+    if 'country' in cfg['network']:
+        country(cfg['network']['country'])
 
-hostname(cfg['network']['hostname'])
+    hostname(cfg['network']['hostname'])
 
-wlan = WLAN(STA_IF)
-wlan.active(True)
+    wlan = WLAN(STA_IF)
+    wlan.active(True)
 
-wlan.connect(cfg['network']['ssid'], cfg['network']['password'])
+    wlan.connect(cfg['network']['ssid'], cfg['network']['password'])
 
-for attempt in range(1, cfg['network']['attempts'] + 1):
-    print(f'connecting to wifi ({attempt=})')
-    if wlan.status() != STAT_CONNECTING:
-        break
-    sleep(1)
+    for attempt in range(1, cfg['network']['attempts'] + 1):
+        print(f'connecting to wifi ({attempt=})')
+        if wlan.status() != STAT_CONNECTING:
+            break
+        sleep(1)
 
-if wlan.status() == STAT_GOT_IP:
-    ip = wlan.ifconfig()[0]
-    print(f'connected, {ip=}')
-else:
-    raise RuntimeError(f'network connection failed ({wlan.status()=})')
+    if wlan.status() == STAT_GOT_IP:
+        ip = wlan.ifconfig()[0]
+        print(f'connected, {ip=}')
+    else:
+        raise RuntimeError(f'network connection failed ({wlan.status()=})')
 
-dbg_sock = socket()
-dbg_sock.connect((cfg['network']['debug_ip'], cfg['network']['debug_port']))
+def recv_exact(sock: socket, n: int) -> bytearray:
+    buf = bytearray(n)
+    view = memoryview(buf)
 
-server_sock = socket()
-server_sock.connect((cfg['network']['server_ip'], cfg['network']['server_port']))
-
-recv_buffer = bytearray()
-def recv_exact(sock: socket, buffer: bytearray, n: int):
     while n > 0:
-        n -= sock.recv_into(buffer, n)
+        got = sock.recv_into(view, n)
+        view = view[got:]
+        n -= got
 
-recv_exact(server_sock, recv_buffer, 1)
-robot_id = struct.unpack('!H', recv_buffer)
-recv_buffer.clear()
+    return buf
+
+def recv_u16(sock: socket) -> int:
+    return struct.unpack('!H', recv_exact(sock, 2))[0]
+
+def recv_str(sock: socket) -> str:
+    return recv_exact(sock, recv_u16(sock)).decode('utf-8')
+
+def setup_dbg() -> socket:
+    dbg_sock = socket()
+    dbg_sock.connect((cfg['network']['debug_ip'], cfg['network']['debug_port']))
+    return dbg_sock
+
+def setup_server() -> tuple[socket, int]:
+    server_sock = socket()
+    server_sock.connect((cfg['network']['server_ip'], cfg['network']['server_port']))
+
+    robot_id = recv_u16(server_sock)
+
+    return robot_id
