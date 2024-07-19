@@ -8,7 +8,7 @@ use std::{
     sync::Arc,
 };
 use tokio::{
-    io::{AsyncReadExt, BufStream},
+    io::{AsyncReadExt, AsyncWriteExt, BufStream},
     net::{TcpListener, TcpStream},
     sync::mpsc::UnboundedReceiver,
 };
@@ -40,10 +40,14 @@ async fn process_socket(
     loop {
         tokio::select! {
             mtype = socket.read_u8() => recv_socket(&mut socket, state, &mut buf, mtype?).await?,
+
             val = ctrl_rx.recv() => {
-                let (name, control) = val.unwrap();
+                let (name, control) = val.expect("ctrl_rx closed???");
+
                 write_string(&mut socket, &name).await?;
                 control.write(&mut socket).await?;
+
+                socket.flush().await?;
             },
         }
     }
@@ -56,8 +60,6 @@ async fn recv_socket(
     buf: &mut Vec<u8>,
     mtype: u8,
 ) -> anyhow::Result<()> {
-    // let mtype = socket.read_u8().await?;
-
     match mtype {
         // 1: debug message
         1 => {
@@ -96,11 +98,13 @@ async fn recv_socket(
                     }
                 };
             }
+            socket.flush().await?;
 
             state.msg_tx.send(SseMessage::ControlsChanged)?;
         }
 
         t => Err(anyhow!("Invalid message type {t}"))?,
     }
+
     Ok(())
 }
