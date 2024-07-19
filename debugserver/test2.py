@@ -1,32 +1,13 @@
 #!/usr/bin/env python3
 
-import socket, struct
+from socket import socket
+import struct
 
 HOST = "127.0.0.1"
 PORT = 9999
 
-def connect():
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-    s.connect((HOST, PORT))
-    return s
-
-dbg_sock = connect()
-conn = True
-
-controls = {
-    'a': True,
-    'b': {
-        'val': 0,
-        'min': -10,
-        'max': 10
-    },
-    'c': 'd',
-    'd': {
-        'val': 0.0,
-        'min': -10.0,
-        'max': 10.0
-    },
-}
+dbg_sock = socket()
+dbg_sock.connect((HOST, PORT))
 
 def define_controls(ctrls: dict):
     dbg_sock.sendall(b'\02' + struct.pack('!H', len(ctrls)))
@@ -65,7 +46,6 @@ def dprint(x):
 
     dbg_sock.sendall(b'\01' + l + bs)
 
-
 def recv_exact(n: int) -> bytearray:
     buf = bytearray(n)
     view = memoryview(buf)
@@ -77,26 +57,42 @@ def recv_exact(n: int) -> bytearray:
 
 def recv_change(ctrls: dict):
     nl = struct.unpack('!H', recv_exact(2))[0]
-
     nm = recv_exact(nl).decode('utf-8')
-    print(nm)
 
     val = ctrls[nm]
-    if type(val) is bool:
+    if isinstance(val, bool):
         val = struct.unpack('!?', recv_exact(1))[0]
-    elif type(val) is str:
+    elif isinstance(val, str):
         l = struct.unpack('!H', recv_exact(2))[0]
         val = recv_exact(l).decode('utf-8')
     else:
-        if type(val['val']) is float:
-            val['val'] = struct.unpack('!f', recv_exact(4))
-        elif type(val['val']) is int:
-            val['val'] = struct.unpack('!q', recv_exact(8))
+        if isinstance(val['val'], float):
+            val['val'] = struct.unpack('!f', recv_exact(4))[0]
+        elif isinstance(val['val'], int):
+            val['val'] = struct.unpack('!q', recv_exact(8))[0]
 
     ctrls[nm] = val
 
+controls = {
+    'a': True,
+    'b': {
+        'val': 0,
+        'min': -10,
+        'max': 10
+    },
+    'c': 'd',
+    'd': {
+        'val': 0.0,
+        'min': -10.0,
+        'max': 10.0
+    },
+}
+
+for i in range(4):
+    dprint('pluh' + i * ' pluh')
 
 define_controls(controls)
+
 while True:
     recv_change(controls)
-    print(controls)
+    dprint(controls)
