@@ -60,12 +60,14 @@ async fn sse_handler(
                         format!("<p>{msg}</p>")
                     };
                     yield Ok(Event::default().event("log").id(&id.to_string()).data(msg));
-                    id += 1;
                 }
                 SseMessage::ControlsChanged => {
-                    // TODO: oob push rerendered controls form
+                    let config = state.config.read().await;
+                    let controls = crate::templates::Controls { config: &config, oob: true }.to_string();
+                    yield Ok(Event::default().event("log").id(&id.to_string()).data(controls));
                 },
             }
+            id += 1;
         }
     };
     Sse::new(stream).keep_alive(KeepAlive::default())

@@ -8,14 +8,13 @@
         <script src="/static/sse.min.js"></script>
         <title></title>
     </head>
-    <body class="h-full bg-teal-950 flex flex-col md:flex-row justify-between md:justify-evenly gap-16">
-        <div id="logs" class="text-white bg-stone-950 overflow-scroll h-full md:h-80 w-full"><samp>
+    <body class="h-full bg-teal-950 text-white flex flex-col md:flex-row justify-between md:justify-evenly gap-16">
+        <div id="logs" class="bg-stone-950 overflow-auto h-full w-full p-3"><samp>
             <div hx-ext="sse" sse-connect="/logs/stream" sse-swap="log" hx-swap="beforeend scroll:#logs:bottom">
                 <p id="logs-placeholder">no logs yet</p>
             </div>
         </samp></div>
 
-{# {% include "controls.html" %} #}
         {{controls|safe}}
     </body>
 </html>
