@@ -16,6 +16,9 @@ pretty_env_logger = "0.5.0"
 rust-embed = { version = "8.4.0", features = ["axum"] }
 tokio = { version = "1.38.0", features = ["full"] }
 
+[profile.release]
+strip = true
+opt-level = 3
 
 [profile.dev.package.askama_derive]
 opt-level = 3

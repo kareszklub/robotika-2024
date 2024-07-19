@@ -36,7 +36,6 @@ def define_controls(ctrls: dict):
         val = ctrls[n]
         ty = -1
 
-        print(val)
         if type(val) is bool:
             ty = b'\00'
             val = struct.pack('!?', val)
@@ -67,6 +66,37 @@ def dprint(x):
     dbg_sock.sendall(b'\01' + l + bs)
 
 
+def recv_exact(n: int) -> bytearray:
+    buf = bytearray(n)
+    view = memoryview(buf)
+    while n:
+        nbytes = dbg_sock.recv_into(view, n)
+        view = view[nbytes:]
+        n -= nbytes
+    return buf
 
-dprint("hello chat")
+def recv_change(ctrls: dict):
+    nl = struct.unpack('!H', recv_exact(2))[0]
+
+    nm = recv_exact(nl).decode('utf-8')
+    print(nm)
+
+    val = ctrls[nm]
+    if type(val) is bool:
+        val = struct.unpack('!?', recv_exact(1))[0]
+    elif type(val) is str:
+        l = struct.unpack('!H', recv_exact(2))[0]
+        val = recv_exact(l).decode('utf-8')
+    else:
+        if type(val['val']) is float:
+            val['val'] = struct.unpack('!f', recv_exact(4))
+        elif type(val['val']) is int:
+            val['val'] = struct.unpack('!q', recv_exact(8))
+
+    ctrls[nm] = val
+
+
 define_controls(controls)
+while True:
+    recv_change(controls)
+    print(controls)
