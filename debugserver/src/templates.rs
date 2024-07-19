@@ -13,7 +13,10 @@ impl<'a> Index<'a> {
     pub async fn get(state: State<Arc<AppState>>) -> Response {
         let config = state.config.read().await;
         Index {
-            controls: Controls { config: &config },
+            controls: Controls {
+                config: &config,
+                oob: false,
+            },
         }
         .into_response()
     }
@@ -22,12 +25,17 @@ impl<'a> Index<'a> {
 #[derive(Template)]
 #[template(path = "controls.html")]
 pub(crate) struct Controls<'a> {
-    config: &'a Config,
+    pub config: &'a Config,
+    pub oob: bool,
 }
 impl<'a> Controls<'a> {
     pub async fn get(state: State<Arc<AppState>>) -> Response {
         let config = state.config.read().await;
-        Controls { config: &config }.into_response()
+        Controls {
+            config: &config,
+            oob: false,
+        }
+        .into_response()
     }
 
     pub async fn post(
@@ -42,7 +50,7 @@ impl<'a> Controls<'a> {
         for (name, control) in body {
             match hs.get_mut(&name) {
                 Some(Control::Bool { value }) => {
-                    let b = control == "on";
+                    let b = control == "on" || control == "true";
                     debug!("{name}: {value} => {b}");
                     *value = b;
                 }

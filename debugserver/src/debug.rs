@@ -39,7 +39,7 @@ async fn process_socket(
 
     loop {
         tokio::select! {
-            mtype = socket.read_u8() => recv_socket(&mut socket, state, &mut buf, mtype.unwrap()).await.unwrap(),
+            mtype = socket.read_u8() => recv_socket(&mut socket, state, &mut buf, mtype?).await?,
             val = ctrl_rx.recv() => {
                 let (name, control) = val.unwrap();
                 write_string(&mut socket, &name).await?;
@@ -96,6 +96,8 @@ async fn recv_socket(
                     }
                 };
             }
+
+            state.msg_tx.send(SseMessage::ControlsChanged)?;
         }
 
         t => Err(anyhow!("Invalid message type {t}"))?,
