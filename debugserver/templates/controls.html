@@ -10,7 +10,7 @@
         {% when Control::Int with { value, min, max }%}
         <input type="range" id="{{name}}" name="{{name}}" value="{{value}}" min="{{min}}" max="{{max}}" step="1" hx-post="/controls" hx-trigger="change">
         {% when Control::String with { value } %}
-        <input type="text" id="{{name}}" name="{{name}}" value="{{value}}" hx-post="/controls">
+        <input type="text" id="{{name}}" name="{{name}}" value="{{value}}" hx-post="/controls" class="text-black">
         {% endmatch %}
     </label>
     {% endfor %}
