@@ -1,4 +1,4 @@
-use crate::{message::Control, templates, AppState, SseMessage};
+use crate::{templates, AppState, SseMessage};
 use askama_axum::IntoResponse;
 use axum::{
     extract::State,
@@ -11,20 +11,11 @@ use axum::{
     Router,
 };
 use futures_util::stream::Stream;
+use itertools::Itertools;
 use rust_embed::Embed;
 use std::{convert::Infallible, sync::Arc};
 
 pub async fn init(state: Arc<AppState>) -> anyhow::Result<()> {
-    {
-        let mut hs = state.config.write().await;
-        hs.insert(
-            "cock".into(),
-            Control::String {
-                value: String::from("balls"),
-            },
-        );
-    }
-
     let router = Router::new()
         .route("/", get(templates::Index::get))
         .route(
@@ -64,8 +55,9 @@ async fn sse_handler(
 
                 SseMessage::ControlsChanged => {
                     let config = state.config.read().await;
+                    let config = config.iter().sorted_by_cached_key(|(_, (i, _))| *i);
 
-                    crate::templates::Controls { config: &config, oob: true }.to_string()
+                    crate::templates::Controls { config: config, oob: true }.to_string()
                 },
             };
 

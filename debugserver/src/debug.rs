@@ -71,12 +71,12 @@ async fn recv_socket(
 
         // 2: define controls
         2 => {
-            let len = socket.read_u16().await? as usize;
+            let len = socket.read_u16().await? as u32;
 
-            let mut ctrls: HashMap<String, Control> = HashMap::new();
-            for _ in 0..len {
+            let mut ctrls: HashMap<String, (u32, Control)> = HashMap::new();
+            for i in 0..len {
                 let name = read_string(socket, buf).await?;
-                ctrls.insert(name, Control::read(socket).await?);
+                ctrls.insert(name, (i, Control::read(socket).await?));
             }
 
             let mut hs = state.config.write().await;
@@ -84,17 +84,17 @@ async fn recv_socket(
             // filter out removed values
             hs.retain(|k, _| ctrls.contains_key(k));
 
-            for (name, control) in ctrls {
+            for (name, (i, control)) in ctrls {
                 match hs.entry(name) {
                     // new value introduced on the pico
                     Entry::Vacant(entry) => {
-                        entry.insert(control);
+                        entry.insert((i, control));
                     }
 
                     // override already exists
                     Entry::Occupied(entry) => {
                         write_string(socket, entry.key()).await?;
-                        entry.get().write(socket).await?;
+                        entry.get().1.write(socket).await?;
                     }
                 };
             }

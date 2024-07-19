@@ -1,18 +1,28 @@
 <div id="controls" {% if oob -%} hx-swap-oob="outerHTML" {%- endif %}>
-    {% for (name, control) in config %}
+    {% for (name, (_, control)) in config.as_ref() %}
     <label>
         {{ name }}
+
         {% match control %}
+
         {% when Control::Bool with { value } %}
-        <input type="checkbox" id="{{name}}" name="{{name}}" {% if value %}checked{% endif %} hx-post="/controls" hx-trigger="change" hx-vals='js:{"{{name}}":{{name}}.checked}'>
+        <input type="checkbox" id="{{name}}" name="{{name}}" {% if value %}checked{% endif %} hx-post="/controls"
+            hx-trigger="change" hx-vals='js:{"{{name}}":{{name}}.checked}'>
+
         {% when Control::Float with { value, min, max }%}
-        <input type="range" id="{{name}}" name="{{name}}" value="{{value}}" min="{{min}}" max="{{max}}" step="0.01" hx-post="/controls" hx-trigger="change">
+        <input type="range" id="{{name}}" name="{{name}}" value="{{value}}" min="{{min}}" max="{{max}}" step="0.01"
+            hx-post="/controls" hx-trigger="change">
+
         {% when Control::Int with { value, min, max }%}
-        <input type="range" id="{{name}}" name="{{name}}" value="{{value}}" min="{{min}}" max="{{max}}" step="1" hx-post="/controls" hx-trigger="change">
+        <input type="range" id="{{name}}" name="{{name}}" value="{{value}}" min="{{min}}" max="{{max}}" step="1"
+            hx-post="/controls" hx-trigger="change">
+
         {% when Control::String with { value } %}
         <input type="text" id="{{name}}" name="{{name}}" value="{{value}}" hx-post="/controls" class="text-black">
+
         {% endmatch %}
     </label>
     {% endfor %}
 </div>
+
 {# vim:set ft=htmldjango: #}
