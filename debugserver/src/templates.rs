@@ -1,7 +1,8 @@
-use crate::{AppState, Config, Control};
+use crate::{AppState, Control};
 use askama::Template;
 use askama_axum::IntoResponse;
 use axum::{extract::State, response::Response, Form};
+use itertools::Itertools;
 use std::{collections::HashMap, sync::Arc};
 
 #[derive(Template)]
@@ -12,12 +13,10 @@ pub(crate) struct Index<'a> {
 impl<'a> Index<'a> {
     pub async fn get(state: State<Arc<AppState>>) -> Response {
         let config = state.config.read().await;
+        let config = config.iter().sorted_by_cached_key(|(_, (i, _))| *i);
 
         Index {
-            controls: Controls {
-                config: &config,
-                oob: false,
-            },
+            controls: Controls { config, oob: false },
         }
         .into_response()
     }
@@ -26,18 +25,15 @@ impl<'a> Index<'a> {
 #[derive(Template)]
 #[template(path = "controls.html")]
 pub(crate) struct Controls<'a> {
-    pub config: &'a Config,
+    pub config: std::vec::IntoIter<(&'a String, &'a (u32, Control))>,
     pub oob: bool,
 }
 impl<'a> Controls<'a> {
     pub async fn get(state: State<Arc<AppState>>) -> Response {
         let config = state.config.read().await;
+        let config = config.iter().sorted_by_cached_key(|(_, (i, _))| *i);
 
-        Controls {
-            config: &config,
-            oob: false,
-        }
-        .into_response()
+        Controls { config, oob: false }.into_response()
     }
 
     pub async fn post(
@@ -50,7 +46,7 @@ impl<'a> Controls<'a> {
 
         let mut hs = state.config.write().await;
         for (name, control) in body {
-            match hs.get_mut(&name) {
+            match hs.get_mut(&name).map(|c| &mut c.1) {
                 Some(Control::Bool { value }) => {
                     let b = control == "on" || control == "true";
 
@@ -83,7 +79,7 @@ impl<'a> Controls<'a> {
                 None => error!("invalid name {name}"),
             }
 
-            let c = hs.get(&name).unwrap();
+            let (_, c) = hs.get(&name).unwrap();
             state.ctrl_tx.send((name, c.to_owned())).unwrap();
         }
     }

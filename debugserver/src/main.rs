@@ -17,7 +17,7 @@ use tokio::{
     task::JoinHandle,
 };
 
-pub type Config = HashMap<String, Control>;
+pub type Config = HashMap<String, (u32, Control)>;
 
 #[derive(Debug, Clone)]
 pub(crate) enum SseMessage {
