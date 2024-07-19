@@ -12,6 +12,7 @@ pub(crate) struct Index<'a> {
 impl<'a> Index<'a> {
     pub async fn get(state: State<Arc<AppState>>) -> Response {
         let config = state.config.read().await;
+
         Index {
             controls: Controls {
                 config: &config,
@@ -31,6 +32,7 @@ pub(crate) struct Controls<'a> {
 impl<'a> Controls<'a> {
     pub async fn get(state: State<Arc<AppState>>) -> Response {
         let config = state.config.read().await;
+
         Controls {
             config: &config,
             oob: false,
@@ -51,16 +53,20 @@ impl<'a> Controls<'a> {
             match hs.get_mut(&name) {
                 Some(Control::Bool { value }) => {
                     let b = control == "on" || control == "true";
+
                     debug!("{name}: {value} => {b}");
                     *value = b;
                 }
+
                 Some(Control::Float { value, min, max }) => {
                     let n = control.parse().unwrap();
+
                     if *min <= n && n <= *max {
                         debug!("{name}: {value} => {n}");
                         *value = n;
                     }
                 }
+
                 Some(Control::Int { value, min, max }) => {
                     let n = control.parse().unwrap();
                     if *min <= n && n <= *max {
@@ -68,11 +74,13 @@ impl<'a> Controls<'a> {
                         *value = n;
                     }
                 }
+
                 Some(Control::String { value }) => {
                     debug!("{name}: {value} => {control}");
                     *value = control;
                 }
-                None => todo!("invalid name"),
+
+                None => error!("invalid name {name}"),
             }
 
             let c = hs.get(&name).unwrap();

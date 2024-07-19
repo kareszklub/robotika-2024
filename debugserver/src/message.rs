@@ -17,6 +17,7 @@ impl Control {
             // bool:
             0 => {
                 let value = w.read_u8().await? != 0;
+
                 Self::Bool { value }
             }
 
@@ -25,6 +26,7 @@ impl Control {
                 let value = w.read_f32().await?;
                 let min = w.read_f32().await?;
                 let max = w.read_f32().await?;
+
                 Self::Float { value, min, max }
             }
 
@@ -33,6 +35,7 @@ impl Control {
                 let value = w.read_i64().await?;
                 let min = w.read_i64().await?;
                 let max = w.read_i64().await?;
+
                 Self::Int { value, min, max }
             }
 
@@ -68,7 +71,7 @@ impl Control {
             Control::Bool { value } => w.write_u8(*value as u8).await,
             Control::Float { value, .. } => w.write_f32(*value).await,
             Control::Int { value, .. } => w.write_i64(*value).await,
-            Control::String { value } => write_string(w, &value).await,
+            Control::String { value } => write_string(w, value).await,
         }
     }
 }

@@ -50,26 +50,31 @@ async fn sse_handler(
 ) -> Sse<impl Stream<Item = Result<Event, Infallible>>> {
     let mut rx = state.msg_tx.subscribe();
     let mut id = 0u32;
+
     let stream = async_stream::stream! {
         while let Ok(msg) = rx.recv().await {
-            match msg {
+            let txt = match msg {
                 SseMessage::Log(msg) => {
-                    let msg = if id == 0 {
+                    if id == 0 {
                         format!("<p hx-swap-oob=\"outerHTML:#logs-placeholder\">{msg}</p>")
                     } else {
                         format!("<p>{msg}</p>")
-                    };
-                    yield Ok(Event::default().event("log").id(&id.to_string()).data(msg));
+                    }
                 }
+
                 SseMessage::ControlsChanged => {
                     let config = state.config.read().await;
-                    let controls = crate::templates::Controls { config: &config, oob: true }.to_string();
-                    yield Ok(Event::default().event("log").id(&id.to_string()).data(controls));
+
+                    crate::templates::Controls { config: &config, oob: true }.to_string()
                 },
-            }
+            };
+
+            yield Ok(Event::default().event("log").id(id.to_string()).data(txt));
+
             id += 1;
         }
     };
+
     Sse::new(stream).keep_alive(KeepAlive::default())
 }
 
