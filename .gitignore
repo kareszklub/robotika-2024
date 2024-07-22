@@ -1,6 +1,13 @@
+network_creds.json
+
 .vscode
 typings
 testing
 
 .mpy
 .obsidian
+
+target
+debugserver/deps
+tailwind.bin
+debugserver.log

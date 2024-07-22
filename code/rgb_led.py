@@ -21,6 +21,6 @@ class RgbLed:
         self._b.freq(freq)
 
     def off(self):
-        self._r.duty_u16(0xffff)
-        self._g.duty_u16(0xffff)
-        self._b.duty_u16(0xffff)
+        self._r.deinit()
+        self._g.deinit()
+        self._b.deinit()

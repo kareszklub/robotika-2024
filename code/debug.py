@@ -1,9 +1,9 @@
-from networking import recv_exact, recv_str, setup_dbg
+from networking import recv_exact, recv_str, socks
 import struct
 
-sock = setup_dbg()
-
 def define_controls(ctrls: dict):
+    sock = socks[0]
+
     sock.sendall(b'\02' + struct.pack('!H', len(ctrls)))
 
     for n in ctrls:
@@ -39,9 +39,13 @@ def dprint(x):
     bs = str(x).encode('utf-8')
     l = struct.pack('!H', len(bs))
 
-    sock.sendall(b'\01' + l + bs)
+    socks[0].sendall(b'\01' + l + bs)
 
 def recv_change(ctrls: dict):
+    sock = socks[0]
+
+    nm = recv_str(sock)
+
     ty = type(ctrls[nm])
     if ty is bool:
         ctrls[nm] = struct.unpack('!?', recv_exact(sock, 1))[0]
