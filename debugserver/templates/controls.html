@@ -1,40 +1,36 @@
-<div id="controls" {% if oob -%} hx-swap-oob="outerHTML" {%- endif %}>
+<div id="controls" class="flex flex-col gap-4 md:gap-8 p-4 md:p-8" {% if oob -%} hx-swap-oob="outerHTML" {%- endif %}>
+    <p>IP: <span class="font-bold">{{ IP.deref() }}</span></p>
     {% for (name, (_, control)) in config.as_ref() %}
-    <label> {{ name }}
+    <div class="w-full flex justify-start items-center gap-4">
+        <label for="{{name}}">{{ name }}</label>
 
         {% match control %}
 
         {% when Control::Bool with { value } %}
-        <input type="checkbox" id="{{name}}" name="{{name}}" {% if value %}checked{% endif %} hx-post="/controls"
+        <input type="checkbox" class="checkbox" id="{{name}}" name="{{name}}" {% if value %}checked{% endif %} hx-post="/controls"
             hx-trigger="change" hx-vals='js:{"{{name}}":{{name}}.checked}'>
 
         {% when Control::Float with { value, min, max }%}
-        <div>
-            <span>{{min}}</span>
-            <input type="range" id="{{name}}-slider" name="{{name}}" value="{{value}}" min="{{min}}" max="{{max}}" step="0.01"
-                hx-post="/controls" hx-trigger="change" oninput="this.parentElement.children[3].value=this.value">
-            <span>{{max}}</span>
+        <span>{{min}}</span>
+        <input type="range" class="range" id="{{name}}-slider" name="{{name}}" value="{{value}}" min="{{min}}" max="{{max}}" step="0.01"
+            hx-post="/controls" hx-trigger="change">
+        <span>{{max}}</span>
 
-            <input type="number" id="{{name}}-box" name="{{name}}-box" value="{{value}}" min="{{min}}" max="{{max}}" step="0.01"
-                oninput="this.parentElement.children[1].value = this.value; this.parentElement.children[1].dispatchEvent(new Event('change'));" class="text-black">
-        </div>
+        <input type="number" class="input input-bordered" id="{{name}}-box" name="{{name}}-box" value="{{value}}" min="{{min}}" max="{{max}}" step="0.01">
 
         {% when Control::Int with { value, min, max }%}
-        <div>
-            <span>{{min}}</span>
-            <input type="range" id="{{name}}-slider" name="{{name}}" value="{{value}}" min="{{min}}" max="{{max}}" step="1"
-                hx-post="/controls" hx-trigger="change" oninput="this.parentElement.children[3].value=this.value">
-            <span>{{max}}</span>
+        <span>{{min}}</span>
+        <input type="range" class="range" id="{{name}}-slider" name="{{name}}" value="{{value}}" min="{{min}}" max="{{max}}" step="1"
+            hx-post="/controls" hx-trigger="change">
+        <span>{{max}}</span>
 
-            <input type="number" id="{{name}}-box" name="{{name}}-box" value="{{value}}" min="{{min}}" max="{{max}}" step="1"
-                oninput="this.parentElement.children[1].value = this.value; this.parentElement.children[1].dispatchEvent(new Event('change'));" class="text-black">
-        </div>
+        <input type="number" class="input input-bordered" id="{{name}}-box" name="{{name}}-box" value="{{value}}" min="{{min}}" max="{{max}}" step="1">
 
         {% when Control::String with { value } %}
-        <input type="text" id="{{name}}" name="{{name}}" value="{{value}}" hx-post="/controls" class="text-black">
+        <input type="text" class="input input-bordered" id="{{name}}" name="{{name}}" value="{{value}}" hx-post="/controls">
 
         {% endmatch %}
-    </label>
+    </div>
     {% endfor %}
 </div>
 
