@@ -1,4 +1,4 @@
 target/
-deps/
-tailwind.bin
+node_modules/
+static/dist/
 debugserver.log

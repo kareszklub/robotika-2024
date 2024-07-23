@@ -71,7 +71,7 @@ async fn sse_handler(
 }
 
 #[derive(Embed)]
-#[folder = "deps"]
+#[folder = "static"]
 struct Asset;
 
 pub struct StaticFile<T>(pub T);
