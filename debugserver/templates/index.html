@@ -15,7 +15,10 @@
             </div>
         </samp></div>
 
-        {{controls|safe}}
+        <div>
+            <p>IP: <span class="font-bold"> {{ IP.deref() }} </span></p>
+            {{controls|safe}}
+        </div>
     </body>
 </html>
 {# vim:set ft=htmldjango: #}

@@ -1,8 +1,10 @@
+use crate::IP;
 use crate::{AppState, Control};
 use askama::Template;
 use askama_axum::IntoResponse;
 use axum::{extract::State, response::Response, Form};
 use itertools::Itertools;
+use std::ops::Deref;
 use std::{collections::HashMap, sync::Arc};
 
 #[derive(Template)]

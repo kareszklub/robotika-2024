@@ -5,8 +5,13 @@ mod templates;
 
 #[macro_use]
 extern crate log;
+use local_ip_address::local_ip;
 use message::Control;
-use std::{collections::HashMap, env, sync::Arc};
+use std::{
+    collections::HashMap,
+    env,
+    sync::{Arc, LazyLock},
+};
 use tokio::{
     io::AsyncWriteExt,
     sync::{
@@ -31,6 +36,9 @@ pub(crate) struct AppState {
     pub config: RwLock<Config>,
 }
 
+static IP: LazyLock<String> =
+    LazyLock::new(|| local_ip().expect("Couldn't get ip address").to_string());
+
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     if env::var("RUST_LOG").is_err() {
@@ -38,6 +46,8 @@ async fn main() -> anyhow::Result<()> {
     }
 
     pretty_env_logger::init();
+
+    LazyLock::force(&IP);
 
     let (msg_tx, msg_rx) = tokio::sync::broadcast::channel(1024);
     let (ctrl_tx, ctrl_rx) = tokio::sync::mpsc::unbounded_channel();
