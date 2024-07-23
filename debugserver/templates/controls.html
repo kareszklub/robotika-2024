@@ -1,7 +1,6 @@
 <div id="controls" {% if oob -%} hx-swap-oob="outerHTML" {%- endif %}>
     {% for (name, (_, control)) in config.as_ref() %}
-    <label>
-        {{ name }}
+    <label> {{ name }}
 
         {% match control %}
 
@@ -10,12 +9,26 @@
             hx-trigger="change" hx-vals='js:{"{{name}}":{{name}}.checked}'>
 
         {% when Control::Float with { value, min, max }%}
-        <input type="range" id="{{name}}" name="{{name}}" value="{{value}}" min="{{min}}" max="{{max}}" step="0.01"
-            hx-post="/controls" hx-trigger="change">
+        <div>
+            <span>{{min}}</span>
+            <input type="range" id="{{name}}-slider" name="{{name}}" value="{{value}}" min="{{min}}" max="{{max}}" step="0.01"
+                hx-post="/controls" hx-trigger="change" oninput="this.parentElement.children[3].value=this.value">
+            <span>{{max}}</span>
+
+            <input type="number" id="{{name}}-box" name="{{name}}-box" value="{{value}}" min="{{min}}" max="{{max}}" step="0.01"
+                oninput="this.parentElement.children[1].value = this.value; this.parentElement.children[1].dispatchEvent(new Event('change'));" class="text-black">
+        </div>
 
         {% when Control::Int with { value, min, max }%}
-        <input type="range" id="{{name}}" name="{{name}}" value="{{value}}" min="{{min}}" max="{{max}}" step="1"
-            hx-post="/controls" hx-trigger="change">
+        <div>
+            <span>{{min}}</span>
+            <input type="range" id="{{name}}-slider" name="{{name}}" value="{{value}}" min="{{min}}" max="{{max}}" step="1"
+                hx-post="/controls" hx-trigger="change" oninput="this.parentElement.children[3].value=this.value">
+            <span>{{max}}</span>
+
+            <input type="number" id="{{name}}-box" name="{{name}}-box" value="{{value}}" min="{{min}}" max="{{max}}" step="1"
+                oninput="this.parentElement.children[1].value = this.value; this.parentElement.children[1].dispatchEvent(new Event('change'));" class="text-black">
+        </div>
 
         {% when Control::String with { value } %}
         <input type="text" id="{{name}}" name="{{name}}" value="{{value}}" hx-post="/controls" class="text-black">
