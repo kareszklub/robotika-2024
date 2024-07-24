@@ -30,9 +30,16 @@ def setup_wifi():
     else:
         raise RuntimeError(f'network connection failed ({wlan.status()=})')
 
-def recv_exact(sock: socket, n: int) -> bytearray:
+def recv_exact(sock: socket, n: int, wait=True) -> bytearray | None:
     buf = bytearray(n)
     view = memoryview(buf)
+
+    if not wait:
+        b = sock.read(n)
+        if len(b) == 0:
+            return None
+
+        view[:len(b)] = b
 
     while n > 0:
         got = sock.readinto(view, n)
@@ -41,11 +48,19 @@ def recv_exact(sock: socket, n: int) -> bytearray:
 
     return buf
 
-def recv_u16(sock: socket) -> int:
-    return struct.unpack('!H', recv_exact(sock, 2))[0]
+def recv_u16(sock: socket, wait=True) -> int | None:
+    b = recv_exact(sock, 2, wait)
+    if b is None:
+        return None
 
-def recv_str(sock: socket) -> str:
-    return recv_exact(sock, recv_u16(sock)).decode('utf-8')
+    return struct.unpack('!H', b)[0]
+
+def recv_str(sock: socket, wait=True) -> str | None:
+    l = recv_u16(sock, wait)
+    if l is None:
+        return None
+
+    return recv_exact(sock, l).decode('utf-8')
 
 socks: list[socket] = [None, None]
 def setup_dbg():
