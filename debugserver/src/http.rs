@@ -57,7 +57,7 @@ async fn sse_handler(
                     let config = state.config.read().await;
                     let config = config.iter().sorted_by_cached_key(|(_, (i, _))| *i);
 
-                    crate::templates::Controls { config: config, oob: true }.to_string()
+                    crate::templates::Controls { config, oob: true }.to_string()
                 },
             };
 
