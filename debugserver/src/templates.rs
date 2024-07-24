@@ -1,5 +1,4 @@
-use crate::IP;
-use crate::{AppState, Control};
+use crate::{AppState, Control, IP};
 use askama::Template;
 use askama_axum::IntoResponse;
 use axum::{extract::State, response::Response, Form};
@@ -47,42 +46,107 @@ impl<'a> Controls<'a> {
         }
 
         let mut hs = state.config.write().await;
-        for (name, control) in body {
-            match hs.get_mut(&name).map(|c| &mut c.1) {
-                Some(Control::Bool { value }) => {
-                    let b = control == "on" || control == "true";
+        for (ctrl_name, ctrl_val) in body {
+            let Some(c) = hs.get_mut(&ctrl_name).map(|c| &mut c.1) else {
+                error!("Invalid control update received for \"{ctrl_name}\"");
+                continue;
+            };
 
-                    debug!("{name}: {value} => {b}");
+            match c {
+                Control::Bool { value } => {
+                    let b = match &ctrl_val[..] {
+                        "on" | "true" => true,
+                        "" | "false" => false,
+
+                        _ => {
+                            error!("Invalid bool update: {ctrl_val}");
+                            continue;
+                        }
+                    };
+
+                    debug!("{ctrl_name}: {value} => {b}");
                     *value = b;
                 }
 
-                Some(Control::Float { value, min, max }) => {
-                    let n = control.parse().unwrap();
+                Control::Float { value, min, max } => {
+                    let Ok(n) = ctrl_val.parse() else {
+                        error!("Invalid float update: {ctrl_val}");
+                        continue;
+                    };
 
                     if *min <= n && n <= *max {
-                        debug!("{name}: {value} => {n}");
+                        debug!("{ctrl_name}: {value} => {n}");
                         *value = n;
+                    } else {
+                        warn!("Out of bound control");
                     }
                 }
 
-                Some(Control::Int { value, min, max }) => {
-                    let n = control.parse().unwrap();
+                Control::Int { value, min, max } => {
+                    let Ok(n) = ctrl_val.parse() else {
+                        error!("Invalid int update: {ctrl_val}");
+                        continue;
+                    };
+
                     if *min <= n && n <= *max {
-                        debug!("{name}: {value} => {n}");
+                        debug!("{ctrl_name}: {value} => {n}");
                         *value = n;
+                    } else {
+                        warn!("Out of bound control");
                     }
                 }
 
-                Some(Control::String { value }) => {
-                    debug!("{name}: {value} => {control}");
-                    *value = control;
+                Control::String(value) => {
+                    debug!("{ctrl_name}: {value} => {ctrl_val}");
+                    *value = ctrl_val;
                 }
 
-                None => error!("invalid name {name}"),
+                Control::Color(r, g, b) => {
+                    let rgb = (
+                        parse_hex_byte(&ctrl_val[1..=2]),
+                        parse_hex_byte(&ctrl_val[3..=4]),
+                        parse_hex_byte(&ctrl_val[5..=6]),
+                    );
+
+                    if let (Ok(rr), Ok(gg), Ok(bb)) = rgb {
+                        debug!("{ctrl_name}: ({r}, {g}, {b}) => ({rr}, {gg}, {bb})");
+
+                        *r = rr;
+                        *g = gg;
+                        *b = bb;
+                    } else {
+                        error!("Invalid color update: {ctrl_val}");
+                    }
+                }
             }
 
-            let (_, c) = hs.get(&name).unwrap();
-            state.ctrl_tx.send((name, c.to_owned())).unwrap();
+            state
+                .ctrl_tx
+                .send((ctrl_name, c.clone()))
+                .expect("Control update channel closed");
         }
     }
+}
+
+fn parse_hex_digit(c: char) -> Result<u8, &'static str> {
+    Ok(match c {
+        '0'..='9' => c as u8 - b'0',
+        'a'..='f' => c as u8 + 10 - b'a',
+        'A'..='F' => c as u8 + 10 - b'A',
+
+        _ => Err("Invalid hex digit")?,
+    })
+}
+
+fn parse_hex_byte(s: &str) -> Result<u8, &'static str> {
+    let mut chars = s.chars();
+
+    let (c1, c2) = (
+        chars.next().ok_or("Missing hex digit")?,
+        chars.next().ok_or("Missing hex digit")?,
+    );
+
+    let (c1, c2) = (parse_hex_digit(c1)?, parse_hex_digit(c2)?);
+
+    Ok(0x10 * c1 + c2)
 }
