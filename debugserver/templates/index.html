@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="icon" href="/static/favicon.ico">
+        <title>Robot debug</title>
+        <link rel="stylesheet" href="/static/dist/style.css" media="all">
+        <script src="/static/dist/index.js"></script>
+    </head>
+    <body class="h-full w-full flex flex-col md:flex-row justify-between">
+        {{controls|safe}}
+
+        <div id="logs" class="bg-stone-950 overflow-auto h-full w-full p-3"><samp>
+            <div hx-ext="sse" sse-connect="/logs/stream" sse-swap="log" hx-swap="beforeend scroll:#logs:bottom">
+                <p id="logs-placeholder">no logs yet</p>
+            </div>
+        </samp></div>
+    </body>
+</html>
+{# vim:set ft=htmldjango: #}

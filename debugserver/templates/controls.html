@@ -1,0 +1,52 @@
+<div id="controls" class="flex flex-col gap-4 md:gap-8 p-4 md:p-8" {% if oob -%} hx-swap-oob="outerHTML" {%- endif %}>
+    <p>IP: <span class="font-bold">{{ IP.deref() }}</span></p>
+
+    {% for (name, (_, control)) in config.as_ref() %}
+    <div class="w-full flex justify-start items-center gap-4">
+        <label for="{{name}}">{{ name }}</label>
+
+        {% match control %}
+
+        {% when Control::Bool with { value } %}
+        <input type="checkbox" class="checkbox" id="{{name}}" name="{{name}}" {% if value %}checked{% endif %} hx-post="/controls"
+            hx-trigger="change" hx-vals='js:{"{{name}}":{{name}}.checked}'>
+
+        {% when Control::Float with { value, min, max }%}
+        <div class="flex flex-col gap-2">
+            <div class="flex gap-2">
+                <span>{{min}}</span>
+                <input type="range" class="range" id="{{name}}-slider" name="{{name}}" value="{{value}}" min="{{min}}" max="{{max}}" step="0.01"
+                    hx-post="/controls" hx-trigger="change">
+                <span>{{max}}</span>
+            </div>
+
+            <input type="number" class="input input-bordered" id="{{name}}-box" name="{{name}}-box" value="{{value}}" min="{{min}}" max="{{max}}" step="0.01">
+        </div>
+
+        {% when Control::Int with { value, min, max }%}
+        <div class="flex flex-col gap-2">
+            <div class="flex gap-2">
+                <span>{{min}}</span>
+                <input type="range" class="range" id="{{name}}-slider" name="{{name}}" value="{{value}}" min="{{min}}" max="{{max}}" step="1"
+                    hx-post="/controls" hx-trigger="change">
+                <span>{{max}}</span>
+            </div>
+
+            <input type="number" class="input input-bordered" id="{{name}}-box" name="{{name}}-box" value="{{value}}" min="{{min}}" max="{{max}}" step="1">
+        </div>
+
+        {% when Control::String with (value) %}
+        <input type="text" class="input input-bordered" id="{{name}}" name="{{name}}" value="{{value}}" hx-post="/controls">
+
+        {% when Control::Color with (r, g, b) %}
+        <input type="color" id="{{name}}" name="{{name}}" hx-post="/controls"
+            value="#{{"{:02x?}{:02x?}{:02x?}"|format(r, g, b)}}"
+            class="text-black p-1 h-10 w-14 block bg-white border border-gray-200 cursor-pointer rounded-lg
+                disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700">
+
+        {% endmatch %}
+    </div>
+    {% endfor %}
+</div>
+
+{# vim:set ft=htmldjango: #}
