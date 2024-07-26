@@ -1,8 +1,8 @@
 from network import hostname, country, WLAN, STA_IF, STAT_CONNECTING, STAT_GOT_IP
 from socket import socket
-from array import array
-from time import sleep
+from errno import EAGAIN
 from config import cfg
+from time import sleep
 import struct
 
 def setup_wifi():
@@ -30,16 +30,25 @@ def setup_wifi():
     else:
         raise RuntimeError(f'network connection failed ({wlan.status()=})')
 
-def recv_exact(sock: socket, n: int, wait=True) -> bytearray | None:
+def recv_exact(sock: socket, n: int, block=True) -> bytearray | None:
     buf = bytearray(n)
     view = memoryview(buf)
 
-    if not wait:
-        b = sock.read(n)
-        if len(b) == 0:
-            return None
+    if not block:
+        sock.setblocking(False)
+
+        try:
+            b = sock.recv(n)
+        except OSError as err:
+            if err.errno == EAGAIN:
+                return None
+            else:
+                raise
+        finally:
+            sock.setblocking(True)
 
         view[:len(b)] = b
+        n -= len(b)
 
     while n > 0:
         got = sock.readinto(view, n)
@@ -48,19 +57,19 @@ def recv_exact(sock: socket, n: int, wait=True) -> bytearray | None:
 
     return buf
 
-def recv_u16(sock: socket, wait=True) -> int | None:
-    b = recv_exact(sock, 2, wait)
+def recv_u16(sock: socket, block=True) -> int | None:
+    b = recv_exact(sock, 2, block)
     if b is None:
         return None
+    else:
+        return struct.unpack('!H', b)[0]
 
-    return struct.unpack('!H', b)[0]
-
-def recv_str(sock: socket, wait=True) -> str | None:
-    l = recv_u16(sock, wait)
+def recv_str(sock: socket, block=True) -> str | None:
+    l = recv_u16(sock, block)
     if l is None:
         return None
-
-    return recv_exact(sock, l).decode('utf-8')
+    else:
+        return recv_exact(sock, l).decode('utf-8')
 
 socks: list[socket] = [None, None]
 def setup_dbg():

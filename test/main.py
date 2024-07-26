@@ -10,8 +10,9 @@ from pid import PID
 from debug import dprint, define_controls, recv_change
 from networking import setup_wifi, setup_dbg
 from time import ticks_ms, ticks_diff
+from collections import OrderedDict
 from machine import Pin, reset
-from dbg_magic import DbgNum
+from dbg_magic import DbgVal
 import micropython
 import math
 
@@ -40,6 +41,8 @@ def main():
     dprint('servo')
     s = Servo(Pin(22, Pin.OUT), min_duty=550_000, mid_duty=1_400_000, max_duty=2_390_000)
     s.deg(0)
+    sleep_ms(200)
+    s.off()
 
     dprint('h bridge')
     hb = HBridge(
@@ -128,23 +131,29 @@ def main():
 
     @micropython.native
     def pid_wall():
-        ctrls = {
-            'P': { 'val': DbgNum(0.0), 'min': 0.0, 'max': 20.0, },
-            'I': { 'val': DbgNum(0.0), 'min': 0.0, 'max': 20.0, },
-            'D': { 'val': DbgNum(0.0), 'min': 0.0, 'max': 20.0, },
+        ctrls = OrderedDict([
+            ('sp', DbgVal(0.3, 0.0, 1.5)),
+            ('color', DbgVal(
+                (1.0, 0.65, 0.0),
+                call=lambda c: rgb_led.set_color(*c)
+            )),
 
-            'IMin': { 'val': DbgNum(-2.0), 'min': -2.0, 'max': 2.0, },
-            'IMax': { 'val': DbgNum( 2.0), 'min': -2.0, 'max': 2.0, },
+            ('P',  DbgVal(0.0, 0.0, 20.0)),
+            ('I',  DbgVal(0.0, 0.0, 20.0)),
+            ('D',  DbgVal(0.0, 0.0, 20.0)),
 
-            'dt': { 'val': DbgNum(0), 'min': 0, 'max': 100, },
+            ('IMin', DbgVal(-2.0, -2.0, 2.0)),
+            ('IMax', DbgVal( 2.0, -2.0, 2.0)),
 
-            'speed offset': { 'val': DbgNum(0.5), 'min': 0.0, 'max': 1.0, },
-        }
+            ('dt', DbgVal(10, 0, 100)),
+
+            ('speed_offset', DbgVal(0.5, 0.0, 1.0)),
+        ])
         define_controls(ctrls)
 
         dprint('PID wall')
 
-        for i in range(10):
+        for i in range(6):
             if i % 2 == 0:
                 rgb_led.set_color(1, 0, 0)
             else:
@@ -157,28 +166,29 @@ def main():
         ultra_sensor = UltraSensor(Pin(20, Pin.OUT), Pin(19, Pin.IN))
 
         pid = PID(
-            0.15,
-            3, 0, 0,
-            -0.75, 0.75
+            ctrls['sp'],
+            ctrls['P'], ctrls['I'], ctrls['D'],
+            ctrls['IMin'], ctrls['IMax'],
         )
-        dt_ms = 10
+        dt_ms = ctrls['dt']
         dt_over = 0
 
-        secs = const(10)
-        speed_offset = const(0.5)
+        secs = const(60)
+        speed_offset = ctrls['speed_offset']
 
         rgb_led.set_color(1, 0.65, 0)
 
+        break_out = False
+        loop_start = ticks_ms()
         @micropython.native
         def run():
             return ticks_diff(ticks_ms(), loop_start) < secs * 1000
-        break_out = False
 
-        loop_start = ticks_ms()
         while run():
             inner_start = ticks_ms()
 
             recv_change(ctrls)
+            dprint(ctrls['test'])
 
             dist = None
             while dist is None:
@@ -198,8 +208,8 @@ def main():
             else:
                 buzzer.off()
 
-            dprint(f'{dist=} {o=}')
-            hb.drive(o, o)
+            # dprint(f'{dist=} {o=}')
+            # dprint('hb.drive(o, o)')
 
             dt = int(dt_ms - ticks_diff(ticks_ms(), inner_start))
             if dt > 0:
@@ -208,6 +218,7 @@ def main():
                 dt_over = -dt
                 dprint(f'{dt_over=}')
 
+        buzzer.off()
         hb.off()
         rgb_led.set_color(0, 1, 0)
 

@@ -1,18 +1,42 @@
+from math import ceil, floor, trunc
 
-from math import ceil, floor, pow, modf, trunc
+class DbgVal:
 
-class DbgNum:
-    _val: int | float
-    __doc__ = '<black magic>'
+    def __init__(self, v, mn=None, mx=None, call=None):
+        self._val = v
 
-    def __init__(self, v: int | float): self._val = v
-    def update(v: int | float): self._val = v
+        if mn is not None and mx is not None:
+            self._min = mn
+            self._max = mx
+        
+        if call is not None:
+            self._call = call
 
-    def __abs__(self):    return abs(self._val)
+    def update(self, v):
+        self._val = v
+        if hasattr(self, '_call'):
+            self._call(v)
+
+    def val_is_instance(self, t):
+        return isinstance(self._val, t)
+
+    def __getattr__(self, name: str):
+        if name == '_val' or name == '_min' or name == '_max' or name == '_call':
+            return super().__getattribute__(name)
+        else:
+            return getattr(self._val, name)
+
+    def __setattr__(self, name: str, value):
+        if name == '_val' or name == '_min' or name == '_max' or name == '_call':
+            super().__setattr__(name, value)
+        else:
+            setattr(self.val, name, value)
+
+    def __abs__(self): return abs(self._val)
     def __add__(self, x): return self._val + x
-    def __and__(self, x): return self._val and x
-    def __bool__(self):   return bool(self._val)
-    def __ceil__(self):   return ceil(self._val)
+    def __and__(self, x): return self._val & x
+    def __bool__(self): return bool(self._val)
+    def __ceil__(self): return ceil(self._val)
     def __divmod__(self, x): return (self._val // x, self._val % x)
     def __eq__(self, o): return self._val == o
     def __float__(self): return float(self._val)
@@ -24,7 +48,7 @@ class DbgNum:
     def __hash__(self): return hash(self._val)
     def __index__(self): return int(self)
     def __int__(self): return int(self._val)
-    def __invert__(self): return not self._val
+    def __invert__(self): return ~self._val
     def __le__(self, x): return self._val < x
     def __lshift__(self, x): return self._val << x
     def __lt__(self, x): return self._val < x
@@ -32,18 +56,18 @@ class DbgNum:
     def __mul__(self, x): return self._val * x
     def __ne__(self, x): return self._val != x
     def __neg__(self): return -self._val
-    def __or__(self, x): return self._val or x
+    def __or__(self, x): return self._val | x
     def __pos__(self): return +self._val
     def __pow__(self, x): return self._val ** x
     def __radd__(self, x): return x + self._val
-    def __rand__(self, x): return x and self._val
+    def __rand__(self, x): return x & self._val
     def __rdivmod__(self, x): return (x // self._val, x % self._val)
     def __repr__(self): return repr(self._val)
     def __rfloordiv__(self, x): return x // self._val
     def __rlshift__(self, x): return x << self._val
     def __rmod__(self, x): return x % self._val
     def __rmul__(self, x): return x * self._val
-    def __ror__(self, x): return x or self._val
+    def __ror__(self, x): return x | self._val
     def __round__(self): return round(self._val)
     def __rpow__(self, x): return x ** self._val
     def __rrshift__(self, x): return x >> self._val
@@ -71,3 +95,6 @@ class DbgNum:
     def __isub__(self, b): self._val -= b
     def __itruediv__(self, b): self._val /= b
     def __ixor__(self, b): self._val ^= b
+    def __len__(self): return len(self._val)
+    def __getitem__(self, i): return self._val[i]
+    def __iter__(self): return iter(self._val)
