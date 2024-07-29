@@ -2,8 +2,21 @@
     <p>IP: <span class="font-bold">{{ IP.deref() }}</span></p>
 
     {% for (name, (_, control)) in config.as_ref() %}
-    <div class="w-full flex justify-start items-center gap-4">
-        <label for="{{name}}">{{ name }}</label>
+    <div class="control-container w-full flex justify-start items-center gap-4">
+        <div class="h-full flex flex-col justify-start items-center gap-4">
+            <label for="{{name}}">{{ name }}</label>
+
+            {% match control %}
+
+            {% when Control::Bool with { value } %}
+            {% else %}
+            <div>
+                <label for="fast">fast</label>
+                <input type="checkbox" name="fast" id="{{name}}-fast" class="inline">
+            </div>
+
+            {%- endmatch %}
+        </div>
 
         {% match control %}
 
@@ -22,9 +35,6 @@
 
             <input type="number" class="input input-bordered" id="{{name}}-box" name="{{name}}-box" value="{{value}}"
                 min="{{min}}" max="{{max}}" step="0.01">
-
-            <label for="fast">fast</label>
-            <input type="checkbox" name="fast" id="{{name}}-fast" class="inline">
         </div>
 
         {% when Control::Int with { value, min, max }%}
@@ -38,34 +48,21 @@
 
             <input type="number" class="input input-bordered" id="{{name}}-box" name="{{name}}-box" value="{{value}}"
                 min="{{min}}" max="{{max}}" step="1">
-
-            <label for="fast">fast</label>
-            <input type="checkbox" name="fast" id="{{name}}-fast" class="inline">
         </div>
 
         {% when Control::String with (value) %}
-        <div>
-            <input type="text" class="input input-bordered" id="{{name}}" name="{{name}}" value="{{value}}"
-                hx-post="/controls">
-
-            <label for="fast">fast</label>
-            <input type="checkbox" name="fast" id="{{name}}-fast" class="inline">
-        </div>
+        <input type="text" class="input input-bordered" id="{{name}}" name="{{name}}" value="{{value}}"
+            hx-post="/controls">
 
         {% when Control::Color with (r, g, b) %}
-        <div>
-            <input type="color" id="{{name}}" name="{{name}}" hx-post="/controls" value="#{{"
-                {:02x?}{:02x?}{:02x?}"|format(r, g, b)}}" class="text-black p-1 h-10 w-14 block bg-white border border-gray-200 cursor-pointer rounded-lg
-                    disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700">
+        <input type="color" id="{{name}}" name="{{name}}" hx-post="/controls" value="#{{"
+            {:02x?}{:02x?}{:02x?}"|format(r, g, b)}}" class="text-black p-1 h-10 w-14 block bg-white border border-gray-200 cursor-pointer rounded-lg
+                disabled:opacity-50 disabled:pointer-events-none dark:bg-neutral-900 dark:border-neutral-700">
 
-            <label for="fast">fast</label>
-            <input type="checkbox" name="fast" id="{{name}}-fast" class="inline">
-        </div>
         {% endmatch %}
-
     </div>
-    {% endfor %}
 
+    {% endfor %}
 </div>
 
 {# vim:set ft=htmldjango: #}
