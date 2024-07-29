@@ -8,7 +8,7 @@ class DbgVal:
         if mn is not None and mx is not None:
             self._min = mn
             self._max = mx
-        
+
         if call is not None:
             self._call = call
 
@@ -17,7 +17,7 @@ class DbgVal:
         if hasattr(self, '_call'):
             self._call(v)
 
-    def val_is_instance(self, t):
+    def is_ty(self, t):
         return isinstance(self._val, t)
 
     def __getattr__(self, name: str):

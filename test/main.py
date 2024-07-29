@@ -7,7 +7,7 @@ from time import sleep_ms
 from servo import Servo
 from pid import PID
 
-from debug import dprint, define_controls, recv_change
+from debug import dprint, define_controls, recv_changes
 from networking import setup_wifi, setup_dbg
 from time import ticks_ms, ticks_diff
 from collections import OrderedDict
@@ -132,6 +132,8 @@ def main():
     @micropython.native
     def pid_wall():
         ctrls = OrderedDict([
+            ('run', DbgVal(True)),
+
             ('sp', DbgVal(0.3, 0.0, 1.5)),
             ('color', DbgVal(
                 (1.0, 0.65, 0.0),
@@ -142,8 +144,8 @@ def main():
             ('I',  DbgVal(0.0, 0.0, 20.0)),
             ('D',  DbgVal(0.0, 0.0, 20.0)),
 
-            ('IMin', DbgVal(-2.0, -2.0, 2.0)),
-            ('IMax', DbgVal( 2.0, -2.0, 2.0)),
+            ('IMin', DbgVal(-2.0, -10.0, 10.0)),
+            ('IMax', DbgVal( 2.0, -10.0, 10.0)),
 
             ('dt', DbgVal(10, 0, 100)),
 
@@ -173,43 +175,35 @@ def main():
         dt_ms = ctrls['dt']
         dt_over = 0
 
-        secs = const(60)
-        speed_offset = ctrls['speed_offset']
-
         rgb_led.set_color(1, 0.65, 0)
 
         break_out = False
-        loop_start = ticks_ms()
-        @micropython.native
-        def run():
-            return ticks_diff(ticks_ms(), loop_start) < secs * 1000
 
-        while run():
+        run = ctrls['run']
+        while run:
             inner_start = ticks_ms()
 
-            recv_change(ctrls)
-            dprint(ctrls['test'])
+            recv_changes(ctrls)
 
             dist = None
             while dist is None:
                 dist = ultra_sensor.measure_sync()
-                if not run():
+                if not run:
                     break_out = True
                     break
 
             if break_out:
                 break
 
-            o = (1 - speed_offset) * -pid.compute(dist, 0.001 * (dt_ms + dt_over))
-            o += math.copysign(speed_offset, o)
+            o = -pid.compute(dist, 0.001 * (dt_ms + dt_over))
 
             if abs(o) > 1:
                 buzzer.set_volume(1)
             else:
                 buzzer.off()
 
-            # dprint(f'{dist=} {o=}')
-            # dprint('hb.drive(o, o)')
+            dprint(f'dist={dist:.2f} o={o * 100:.2f}%')
+            hb.drive(o, o)
 
             dt = int(dt_ms - ticks_diff(ticks_ms(), inner_start))
             if dt > 0:

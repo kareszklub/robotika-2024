@@ -16,20 +16,20 @@ def define_controls(ctrls: dict):
         ty = None
         res = None
 
-        if ctrl.val_is_instance(bool):
+        if ctrl.is_ty(bool):
             ty = b'\x00'
-            res = struct.pack('!?', val)
-        elif ctrl.val_is_instance(float):
+            res = struct.pack('!B', val)
+        elif ctrl.is_ty(float):
             ty = b'\x01'
             res = struct.pack('!3f', val, ctrl._min, ctrl._max)
-        elif ctrl.val_is_instance(int):
+        elif ctrl.is_ty(int):
             ty = b'\x02'
             res = struct.pack('!3q', val, ctrl._min, ctrl._max)
-        elif ctrl.val_is_instance(str):
+        elif ctrl.is_ty(str):
             ty = b'\x03'
             res = val.encode('utf-8')
             res = struct.pack('!H', len(res)) + res
-        elif ctrl.val_is_instance(tuple):
+        elif ctrl.is_ty(tuple):
             ty = b'\x04'
             res = struct.pack(
                 '!3B',
@@ -48,23 +48,23 @@ def dprint(x):
 
     socks[0].sendall(l + bs)
 
-def recv_change(ctrls: dict):
+def recv_change(ctrls: dict) -> bool:
     sock = socks[0]
 
     nm = recv_str(sock, False)
     if nm is None:
-        return
+        return False
 
     ctrl = ctrls[nm]
-    if ctrl.val_is_instance(bool):
-        val = struct.unpack('!?', recv_exact(sock, 1))[0]
-    elif ctrl.val_is_instance(float):
+    if ctrl.is_ty(bool):
+        val = struct.unpack('!B', recv_exact(sock, 1))[0]
+    elif ctrl.is_ty(float):
         val = struct.unpack('!f', recv_exact(sock, 4))[0]
-    elif ctrl.val_is_instance(int):
+    elif ctrl.is_ty(int):
         val = struct.unpack('!q', recv_exact(sock, 8))[0]
-    elif ctrl.val_is_instance(str):
+    elif ctrl.is_ty(str):
         val = recv_str(sock)
-    elif ctrl.val_is_instance(tuple):
+    elif ctrl.is_ty(tuple):
         val = struct.unpack('!3B', recv_exact(sock, 3))
         val = (
             val[0] / 255,
@@ -73,3 +73,8 @@ def recv_change(ctrls: dict):
         )
 
     ctrl.update(val)
+    return True
+
+def recv_changes(ctrls: dict):
+    while recv_change(ctrls):
+        pass
