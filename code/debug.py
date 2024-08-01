@@ -4,8 +4,10 @@ import struct
 
 def define_controls(ctrls: dict):
     sock = socks[0]
+    if sock is None:
+        return
 
-    sock.sendall(struct.pack('!BH', 2, len(ctrls)))
+    sock.write(struct.pack('!BH', 2, len(ctrls)))
 
     for n in ctrls:
         nb = str(n).encode('utf-8')
@@ -21,7 +23,7 @@ def define_controls(ctrls: dict):
             res = struct.pack('!B', val)
         elif ctrl.is_ty(float):
             ty = b'\x01'
-            res = struct.pack('!3f', val, ctrl._min, ctrl._max)
+            res = struct.pack('!3f', val, float(ctrl._min), float(ctrl._max))
         elif ctrl.is_ty(int):
             ty = b'\x02'
             res = struct.pack('!3q', val, ctrl._min, ctrl._max)
@@ -38,18 +40,27 @@ def define_controls(ctrls: dict):
                 floor(ctrl[2] * 255)
             )
 
-        sock.sendall(struct.pack('!H', len(nb)) + nb + ty + res)
+        sock.write(struct.pack('!H', len(nb)) + nb + ty + res)
+
+    recv_changes(ctrls)
 
 def dprint(x):
     print(x)
 
+    s = socks[0]
+
+    if s is None:
+        return
+
     bs = str(x).encode('utf-8')
     l = struct.pack('!BH', 1, len(bs))
 
-    socks[0].sendall(l + bs)
+    s.write(l + bs)
 
 def recv_change(ctrls: dict) -> bool:
     sock = socks[0]
+    if sock is None:
+        return False
 
     nm = recv_str(sock, False)
     if nm is None:

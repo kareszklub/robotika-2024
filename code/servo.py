@@ -17,7 +17,7 @@ class Servo:
         self._max = max_duty
 
     def duty(self, d: float):
-        d = clamp(d, 0, 1)
+        d = 1 - clamp(d, 0, 1)
 
         duty = (
             (self._min + int((self._mid - self._min) * d * 2)) if d <= 0.5

@@ -3,7 +3,7 @@
         "country": "hu",
         "hostname": "testrobot",
 
-        "attempts": 5,
+        "attempts": 200,
 
         "debug_ip": "192.168.0.20",
         "debug_port": 9999,
@@ -62,7 +62,7 @@
         "freq": 300
     },
 
-    "proxymity_sensor": {
+    "proximity_sensor": {
         "pin": 21
     },
 

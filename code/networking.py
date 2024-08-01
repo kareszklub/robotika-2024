@@ -1,8 +1,8 @@
-from network import hostname, country, WLAN, STA_IF, STAT_CONNECTING, STAT_GOT_IP
-from socket import socket
+from network import hostname, country, WLAN, STA_IF, STAT_CONNECTING
+from socket import socket, AF_INET, SOCK_STREAM
+from time import sleep_ms
 from errno import EAGAIN
 from config import cfg
-from time import sleep
 import struct
 
 def setup_wifi():
@@ -12,21 +12,26 @@ def setup_wifi():
     hostname(cfg['network']['hostname'])
 
     wlan = WLAN(STA_IF)
-    wlan.active(True)
+
+    if not wlan.active():
+        wlan.active(True)
+
+    if wlan.isconnected():
+        return
 
     ssid = cfg['network']['creds']['ssid']
     passw = cfg['network']['creds']['password']
+
     wlan.connect(ssid, passw)
 
     for attempt in range(1, cfg['network']['attempts'] + 1):
-        print(f'connecting to \'{ssid}\' ({attempt=})')
-        if wlan.status() != STAT_CONNECTING:
+        if wlan.status() < 0 or wlan.status() >= 3:
             break
-        sleep(1)
 
-    if wlan.status() == STAT_GOT_IP:
+        sleep_ms(100)
+
+    if wlan.isconnected():
         ip = wlan.ifconfig()[0]
-        print(f'connected, {ip=}')
     else:
         raise RuntimeError(f'network connection failed ({wlan.status()=})')
 
@@ -43,7 +48,7 @@ def recv_exact(sock: socket, n: int, block=True) -> bytearray | None:
             if err.errno == EAGAIN:
                 return None
             else:
-                raise
+                raise err
         finally:
             sock.setblocking(True)
 
@@ -73,13 +78,13 @@ def recv_str(sock: socket, block=True) -> str | None:
 
 socks: list[socket] = [None, None]
 def setup_dbg():
-    dbg_sock = socket()
+    dbg_sock = socket(AF_INET, SOCK_STREAM)
     dbg_sock.connect((cfg['network']['debug_ip'], cfg['network']['debug_port']))
 
     socks[0] = dbg_sock
 
 def setup_server() -> int:
-    server_sock = socket()
+    server_sock = socket(AF_INET, SOCK_STREAM)
     server_sock.connect((cfg['network']['server_ip'], cfg['network']['server_port']))
 
     socks[1] = server_sock

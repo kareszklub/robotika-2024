@@ -5,27 +5,26 @@ import struct
 DEFAULT_ADDRESS = const(0x29)
 CMD_BIT = const(0x80)
 
-class Register:
-    ENABLE  = const(0x00)
-    ATIME   = const(0x01)
-    WTIME   = const(0x03)
-    AILTL   = const(0x04)
-    AILTH   = const(0x05)
-    AIHTL   = const(0x06)
-    AIHTH   = const(0x07)
-    PERS    = const(0x0C)
-    CONFIG  = const(0x0D)
-    CONTROL = const(0x0F)
-    ID      = const(0x12)
-    STATUS  = const(0x13)
-    CDATAL  = const(0x14)
-    CDATAH  = const(0x15)
-    RDATAL  = const(0x16)
-    RDATAH  = const(0x17)
-    GDATAL  = const(0x18)
-    GDATAH  = const(0x19)
-    BDATAL  = const(0x1A)
-    BDATAH  = const(0x1B)
+REG_ENABLE  = const(0x00)
+REG_ATIME   = const(0x01)
+REG_WTIME   = const(0x03)
+REG_AILTL   = const(0x04)
+REG_AILTH   = const(0x05)
+REG_AIHTL   = const(0x06)
+REG_AIHTH   = const(0x07)
+REG_PERS    = const(0x0C)
+REG_CONFIG  = const(0x0D)
+REG_CONTROL = const(0x0F)
+REG_ID      = const(0x12)
+REG_STATUS  = const(0x13)
+REG_CDATAL  = const(0x14)
+REG_CDATAH  = const(0x15)
+REG_RDATAL  = const(0x16)
+REG_RDATAH  = const(0x17)
+REG_GDATAL  = const(0x18)
+REG_GDATAH  = const(0x19)
+REG_BDATAL  = const(0x1A)
+REG_BDATAH  = const(0x1B)
 
 PON  = const(0x01)
 AEN  = const(0x02)
@@ -49,9 +48,9 @@ class RgbSensor:
         self._addr = addr
         self._i2c = i2c
 
-        self._write_bits(Register.ENABLE, PON, PON)
+        self._write_bits(REG_ENABLE, PON, PON)
         sleep_ms(10)
-        self._write_bits(Register.ENABLE, AEN, AEN)
+        self._write_bits(REG_ENABLE, AEN, AEN)
 
         if integration_time:
             self.set_integration_time(integration_time)
@@ -78,37 +77,37 @@ class RgbSensor:
         return struct.unpack('<H', self._i2c.readfrom_mem(self._addr, CMD_BIT | reg, 2))[0]
 
     def get_data(self) -> tuple[int, int, int, int]:
-        color_bytes = self._i2c.readfrom_mem(self._addr, CMD_BIT | Register.CDATAL, 4 * 2)
+        color_bytes = self._i2c.readfrom_mem(self._addr, CMD_BIT | REG_CDATAL, 4 * 2)
         return struct.unpack('<HHHH', color_bytes)
 
     def set_integration_time(self, it: int):
-        self._write8(Register.ATIME, 0xff - it)
+        self._write8(REG_ATIME, 0xff - it)
 
     def set_gain(self, gain: int):
-        self._write_bits(Register.CONTROL, gain, 0b11)
+        self._write_bits(REG_CONTROL, gain, 0b11)
 
     def set_wait(self, wait: int):
-        self._write8(Register.ATIME, 0xff - wait)
+        self._write8(REG_ATIME, 0xff - wait)
 
     def set_wait_long(self, flag: bool):
-        self._write_bits(Register.CONFIG, int(flag), 0b1)
+        self._write_bits(REG_CONFIG, int(flag), 0b1)
 
     def set_interrupt(self, f):
-        self._write_bits(Register.ENABLE, AIEN, AIEN)
+        self._write_bits(REG_ENABLE, AIEN, AIEN)
         if self._interrupt_pin:
             self._interrupt_pin.irq(f, Pin.IRQ_RISING)
 
     def clear_interrupt(self):
-        self._write_bits(Register.ENABLE, ~AIEN, AIEN)
+        self._write_bits(REG_ENABLE, ~AIEN, AIEN)
         if self._interrupt_pin:
             self._interrupt_pin.irq(None)
 
     def set_interrupt_limits(self, l: int, h: int):
-        self._write16(Register.AILTL, l)
-        self._write16(Register.AIHTL, h)
+        self._write16(REG_AILTL, l)
+        self._write16(REG_AIHTL, h)
 
     def set_interrupt_persistance(self, pers: int):
-        self._write_bits(Register.PERS, pers, 0b111)
+        self._write_bits(REG_PERS, pers, 0b111)
 
     def set_led(self, state: bool):
         if self._led_pin:
