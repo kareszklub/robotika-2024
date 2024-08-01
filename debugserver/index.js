@@ -36,6 +36,11 @@ const onload = () => {
             });
         }
     });
+
+    const logs = document.getElementById('logs');
+    document.getElementById('clear-logs').addEventListener('click', () => {
+        logs.innerHTML = '';
+    });
 };
 
 const MAX_ELEMENTS = 500;

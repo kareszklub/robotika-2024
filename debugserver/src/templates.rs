@@ -40,7 +40,7 @@ impl<'a> Controls<'a> {
     pub async fn post(
         State(state): State<Arc<AppState>>,
         Form(body): Form<HashMap<String, String>>,
-    ) -> impl IntoResponse {
+    ) {
         if body.len() > 1 {
             warn!("multiple controls updated: {body:?}");
         }

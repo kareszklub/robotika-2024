@@ -14,11 +14,7 @@ use std::{
 };
 use tokio::{
     io::AsyncWriteExt,
-    sync::{
-        broadcast::{Receiver, Sender},
-        mpsc::UnboundedSender,
-        RwLock,
-    },
+    sync::{broadcast, mpsc, Notify, RwLock},
     task::JoinHandle,
 };
 
@@ -31,9 +27,11 @@ pub(crate) enum SseMessage {
 }
 
 pub(crate) struct AppState {
-    pub msg_tx: Sender<SseMessage>,
-    pub ctrl_tx: UnboundedSender<(String, Control)>,
+    pub msg_tx: broadcast::Sender<SseMessage>,
+    pub ctrl_tx: mpsc::UnboundedSender<(String, Control)>,
     pub config: RwLock<Config>,
+
+    pub disconnect: Arc<Notify>,
 }
 
 static IP: LazyLock<String> =
@@ -49,17 +47,19 @@ async fn main() -> anyhow::Result<()> {
 
     LazyLock::force(&IP);
 
-    let (msg_tx, msg_rx) = tokio::sync::broadcast::channel(1024);
-    let (ctrl_tx, ctrl_rx) = tokio::sync::mpsc::unbounded_channel();
+    let (msg_tx, msg_rx) = broadcast::channel(1024);
+    let (ctrl_tx, ctrl_rx) = mpsc::unbounded_channel();
 
+    let disconnect = Arc::new(Notify::new());
     let state = Arc::new(AppState {
         msg_tx,
         ctrl_tx,
         config: Default::default(),
+        disconnect: disconnect.clone(),
     });
 
     let file_task = tokio::task::spawn(log_file(msg_rx));
-    let debug_task = tokio::task::spawn(debug::init(state.clone(), ctrl_rx));
+    let debug_task = tokio::task::spawn(debug::init(state.clone(), ctrl_rx, disconnect));
     let http_task = tokio::task::spawn(http::init(state));
 
     let _ = tokio::try_join!(flatten(file_task), flatten(http_task), flatten(debug_task))?;
@@ -75,7 +75,7 @@ async fn flatten<T>(handle: JoinHandle<anyhow::Result<T>>) -> anyhow::Result<T> 
     }
 }
 
-async fn log_file(mut rx: Receiver<SseMessage>) -> anyhow::Result<()> {
+async fn log_file(mut rx: broadcast::Receiver<SseMessage>) -> anyhow::Result<()> {
     let mut file = tokio::fs::File::options()
         .create(true)
         .append(true)

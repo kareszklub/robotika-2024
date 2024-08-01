@@ -10,20 +10,25 @@ use std::{
 use tokio::{
     io::{AsyncReadExt, AsyncWriteExt, BufStream},
     net::{TcpListener, TcpStream},
-    sync::mpsc::UnboundedReceiver,
+    sync::{mpsc, Notify},
 };
 
 pub async fn init(
     state: Arc<AppState>,
-    mut ctrl_rx: UnboundedReceiver<(String, Control)>,
+    mut ctrl_rx: mpsc::UnboundedReceiver<(String, Control)>,
+    disconnect: Arc<Notify>,
 ) -> anyhow::Result<()> {
     let listener = TcpListener::bind("0.0.0.0:9999").await?;
 
     loop {
+        info!("waiting for new connection");
+
         let (socket, _) = listener.accept().await?;
 
+        info!("new client connected: {}", socket.peer_addr()?);
+
         // will "block" this loop for the socket, meaning maximum one pico will be handled at any time
-        if let Err(e) = process_socket(socket, &state, &mut ctrl_rx).await {
+        if let Err(e) = process_socket(socket, &state, &mut ctrl_rx, &disconnect).await {
             error!("error while processing debug socket: {e}");
         }
     }
@@ -32,9 +37,11 @@ pub async fn init(
 async fn process_socket(
     socket: TcpStream,
     state: &AppState,
-    ctrl_rx: &mut UnboundedReceiver<(String, Control)>,
+    ctrl_rx: &mut mpsc::UnboundedReceiver<(String, Control)>,
+    disconnect: &Notify,
 ) -> anyhow::Result<()> {
     let mut socket = BufStream::new(socket);
+
     let mut buf = Vec::new();
 
     loop {
@@ -46,20 +53,28 @@ async fn process_socket(
 
                 write_string(&mut socket, &name).await?;
                 control.write(&mut socket).await?;
-
-                socket.flush().await?;
             },
+
+            () = disconnect.notified() => {
+                info!("disconnecting...");
+                return Ok(())
+            }
         }
+
+        socket.flush().await?;
     }
 }
 
 // read and process a singular message
-async fn recv_socket(
-    socket: &mut BufStream<TcpStream>,
+async fn recv_socket<R>(
+    socket: &mut R,
     state: &AppState,
     buf: &mut Vec<u8>,
     mtype: u8,
-) -> anyhow::Result<()> {
+) -> anyhow::Result<()>
+where
+    R: AsyncReadExt + AsyncWriteExt + Unpin,
+{
     match mtype {
         // 1: debug message
         1 => {
@@ -98,6 +113,7 @@ async fn recv_socket(
                     }
                 };
             }
+            drop(hs);
             socket.flush().await?;
 
             state.msg_tx.send(SseMessage::ControlsChanged)?;
