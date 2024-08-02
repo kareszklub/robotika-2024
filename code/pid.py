@@ -13,6 +13,8 @@ class PID:
     _prev_err: float
     _integr: float
 
+    _integr_const: float
+
     def __init__(self, sp: float, p: float, i: float, d: float, integr_min: float, integr_max: float):
         self.sp = sp
         self.P = p
@@ -27,7 +29,7 @@ class PID:
     def compute(self, pv: float, dt: float) -> float:
         err = self.sp - pv
 
-        self._integr += err * dt
+        self._integr += self._integr_const * err * dt
         self._integr = clamp(self._integr, float(self.integr_min), float(self.integr_max))
 
         der = (err - self._prev_err) / dt

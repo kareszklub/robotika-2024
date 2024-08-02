@@ -6,12 +6,12 @@ from buzzer import Buzzer
 from time import sleep_ms
 from servo import Servo
 
+from utils import hsv_to_rgb, rgb_rel, get_vsys, get_temperature
 from debug import dprint, define_controls, recv_changes
 from networking import setup_wifi, setup_dbg, socks
+from machine import Pin, ADC, I2C, reset
 from time import ticks_ms, ticks_diff
-from utils import hsv_to_rgb, rgb_rel
 from collections import OrderedDict
-from machine import Pin, reset, I2C
 from sys import print_exception
 from dbg_magic import DbgVal
 from config import cfg
@@ -205,17 +205,21 @@ def pid_wall(r: Robot):
 
         ('sp', DbgVal(0.3, 0, 1.5)),
 
-        ('P', DbgVal(0.0, 0, 50)),
-        ('I', DbgVal(0.0, 0, 50)),
-        ('D', DbgVal(0.0, 0, 50)),
+        ('P', DbgVal(0.0, 0, 50)), # 10
+        ('I', DbgVal(0.0, 0, 50)), # 2
+        ('D', DbgVal(0.0, 0, 50)), # 2
 
-        ('dt', DbgVal(30, 1, 100)),
+        ('II', DbgVal(1.0, 0.01, 100)), # 10
 
-        ('speed offset', DbgVal(0.5, 0, 1)),
+        ('dt', DbgVal(20, 1, 100)), # 15
+
+        ('front speed offset', DbgVal(0.6, 0, 1)),
+        ('side speed offset', DbgVal(0.7, 0, 1)),
+
         ('ultra avg len', DbgVal(3, 1, 30)),
 
-        ('IMin', DbgVal(-0.7, -2, 2)),
-        ('IMax', DbgVal( 0.7, -2, 2)),
+        ('IMin', DbgVal(-0.05, -2, 2)),
+        ('IMax', DbgVal( 0.05, -2, 2)),
     ])
     define_controls(ctrls)
 
@@ -230,12 +234,18 @@ def pid_wall(r: Robot):
     pid = PID(
         ctrls['sp'],
         ctrls['P'], ctrls['I'], ctrls['D'],
-        ctrls['IMin'], ctrls['IMax'],
+        ctrls['IMin'], ctrls['IMax']
     )
 
     r.ultra_sensor._arr_len = ctrls['ultra avg len']
-    speed_offset = ctrls['speed offset']
+    pid._integr_const = ctrls['II']
+
+    front_speed_offset = ctrls['front speed offset']
+    side_speed_offset = ctrls['side speed offset']
+
     servo_duty = ctrls['servo duty']
+    r.servo.duty(servo_duty)
+
     side = ctrls['side']
     dt_ms = ctrls['dt']
     run = ctrls['run']
@@ -260,18 +270,20 @@ def pid_wall(r: Robot):
 
         if not run:
             break
-        
+
         dt_pid = 0.001 * (dt_ms + dt_over)
         o = -pid.compute(dist, dt_pid)
 
         if side:
-            if servo_duty >= 0.5:
+            if servo_duty < 0.5:
                 o = -o
 
-            r.h_bridge.drive(speed_offset + o, speed_offset - o)
+            r.h_bridge.drive(side_speed_offset + o, side_speed_offset - o)
         else:
-            if abs(o) <= 0.1:
+            if abs(o) <= 0.2:
                 o = 0
+            else:
+                o = math.copysign(front_speed_offset, o) + (1 - front_speed_offset) * o
 
             r.h_bridge.drive(o, o)
 
@@ -286,7 +298,7 @@ def pid_wall(r: Robot):
         dprint(
             f'<span style="background:rgb{col};display:inline-block;' +
             'width:30px;height:15px;vertical-align:middle;"></span>' +
-            f' dist={dist:.5f} I={pid._integr:+.3f} dt={dt_pid:.3f}'
+            f' dist={dist:.5f} I={pid._integr:+.3f} dt={dt_pid:.3f} o={o:.3f}'
         )
 
         gc.collect()
@@ -315,13 +327,21 @@ def pid_line(r: Robot):
         sleep_ms(20)
 
 def main():
+    vsys = get_vsys()
+    temp = get_temperature()
+
     r = Robot()
     r.init()
+
+    r.h_bridge.off()
+    r.rgb_led.off()
+    r.buzzer.off()
+    r.servo.off()
 
     setup_wifi()
     setup_dbg()
 
-    dprint('starting')
+    dprint(f'starting.. {vsys=} {temp=}')
     try:
         # test_stuffe(r)
         pid_wall(r)

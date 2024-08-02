@@ -42,8 +42,6 @@ def define_controls(ctrls: dict):
 
         sock.write(struct.pack('!H', len(nb)) + nb + ty + res)
 
-    recv_changes(ctrls)
-
 def dprint(x):
     print(x)
 
