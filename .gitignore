@@ -1,4 +1,7 @@
 network_creds.json
+target/
+node_modules/
+debugserver.log
 
 .vscode
 typings

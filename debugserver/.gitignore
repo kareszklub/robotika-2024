@@ -1,4 +1,1 @@
-target/
-node_modules/
 static/dist/
-debugserver.log

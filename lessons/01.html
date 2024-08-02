@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Robotika[0]</title>
+
+	<link rel="stylesheet" href="reveal.js/dist/reveal.css"/>
+	<link rel="stylesheet" href="reveal.js/dist/theme/night.css"/>
+
+	<!-- For syntax highlighting -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <!-- <link rel="stylesheet" href="reveal.js/plugin/highlight/monokai.css"> -->
+</head>
+
+<body>
+<div class="reveal"><div class="slides">
+
+<!-- Title -->
+<section>
+
+<h1 class="r-fit-text">Robotika[0]</h1>
+<h2>2024</h2>
+
+</section>
+
+<!-- Introductions -->
+<section>
+<h2>Bemutatkozás</h2>
+
+<table>
+<tbody>
+<tr>
+<td>
+	<h3>Beni</h3>
+	<ul>
+		<li>11F</li>
+		<li>diákkör vezető</li>
+		<li>tavalyi robotika</li>
+		<li>rust shill</li>
+		<li>nixos user</li>
+	</ul>
+</td>
+
+<td class="fragment">
+	<h3>Kristóf</h3>
+	<ul>
+		<li>13F (BME mérnökinfó)</li>
+		<li>cybersec</li>
+		<li>rust shill</li>
+		<li>arch btw</li>
+	</ul>
+</td>
+</tr>
+</tbody>
+</table>
+</section>
+
+<!-- Mit fogunk megépíteni? - cél -->
+<section data-auto-animate>
+
+<h2 data-id="title">Mit fogunk megépíteni? - cél</h3>
+
+<ul>
+	<li data-id="robot">egy kétkerekű vonal- / falkövető robot</li>
+	<li data-id="assembly">könnyen összeszerelhető</li>
+	<li data-id="prog">programozható</li>
+	<li data-id="wireless">vezeték nélküli</li>
+</ul>
+
+</section>
+
+<!-- Mit fogunk megépíteni? - megvalósítás -->
+<section data-auto-animate>
+<h4 data-id="title">Mit fogunk megépíteni? - megvalósítás</h4>
+
+<ul>
+	<li data-id="robot">egy kétkerekű vonal- / falkövető robot
+		<ul><li>fordulatszám, nyomaték, max sebesség</li></ul>
+	</li>
+
+	<li data-id="assembly">
+		könnyen összeszerelhető
+		<ul>
+			<li>3D nyomtatott váz
+				<ul><li>több darabban</li></ul>
+			</li>
+			<li>breadboard (próbapanel)</li>
+		</ul>
+	</li>
+
+	<li data-id="prog">programozható
+		<ul><li>mikrokontroller (Rasperry Pi Pico W)</li></ul>
+	</li>
+
+	<li data-id="wireless">vezeték nélküli
+		<ul>
+			<li>akkumulátor</li>
+			<li>wifi</li>
+		</ul>
+	</li>
+</ul>
+
+</section>
+
+<!-- Downloads #1 -->
+<section data-auto-animate>
+<h2>Downloads</h2>
+
+<ul>
+	<li><a href="https://code.visualstudio.com/download/">VSCode</a></li>
+	<li><a href="https://www.python.org/downloads/">Python</a></li>
+	<li><a href="https://micropython.org/download/RPI_PICO_W/">MicroPython firmware</a></li>
+</ul>
+</section>
+
+<!-- Downloads #2 -->
+<section data-auto-animate>
+<h2>Downloads</h2>
+
+<ul>
+	<li><a href="https://code.visualstudio.com/download/">VSCode</a></li>
+	<li><pre><code data-trim data-noescape class="hljs bash r-fit-text">
+		winget install python.python.3.13
+	</code></pre></li>
+	<li><a href="https://micropython.org/download/RPI_PICO_W/">MicroPython firmware</a></li>
+</ul>
+</section>
+	
+<!-- Python packages -->
+<section>
+<h2>Python packages</h2>
+<pre><code data-trim data-noescape class="hljs bash">
+pip install --user mpremote --break-system-packages
+</code></pre>
+
+<pre><code data-trim data-noescape class="hljs bash r-fit-text">
+pip install -U micropython-rp2-pico_w-stubs --no-user --target ./typings
+</code></pre>
+
+</section>
+		
+<!-- Hello world #1 -->
+<section data-auto-animate>
+<h2 data-id="title">Hello World! 👋</h2>
+<pre><code data-trim data-noescape class="hljs python">
+print('Hello World')
+</code></pre>
+</section>
+
+<!-- Hello world #2 -->
+<section data-auto-animate>
+<h2 data-id="title">Hello World! 🤖</h2>
+<pre><code data-trim data-noescape class="hljs python" data-line-numbers>
+from time import sleep_ms
+from machine import Pin
+
+led = Pin("LED", Pin.OUT)
+
+for i in range(10):
+	print(i)
+	led.toggle()
+	sleep_ms(500)
+
+print('done')
+</code></pre>
+</section>
+
+</div></div>
+
+<script src="reveal.js/dist/reveal.js"></script>
+<script src="reveal.js/plugin/highlight/highlight.js"></script>
+<script>
+	Reveal.initialize({
+		slideNumber: 'c/t',
+		plugins: [ RevealHighlight ]
+	});
+</script>
+
+</body>
+</html>
