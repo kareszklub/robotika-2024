@@ -25,7 +25,7 @@ class UltraSensor:
 
     def measure_sync(self) -> float | None:
         self._trig.value(True)
-        sleep_us(10)
+        sleep_us(15)
         self._trig.value(False)
 
         dur_us = time_pulse_us(self._echo, 1, 60_000)
@@ -39,7 +39,7 @@ class UltraSensor:
             self._arr[self._arr_p] = m
             self._arr_p = (self._arr_p + 1) % self._arr_len
         else:
-            l += 1
             self._arr.append(m)
+            self._arr_p = 0
 
-        return sum(self._arr) / l
+        return sum(self._arr[:self._arr_len]) / self._arr_len
