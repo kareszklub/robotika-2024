@@ -1,3 +1,5 @@
+from machine import Pin, ADC
+import network
 
 def clamp(f, mn, mx):
     if f < mn:
@@ -63,3 +65,33 @@ def hsv_to_rgb(h: float, s: float, v: float) -> tuple[float, float, float]:
 
     r, g, b = rgb
     return r + m, g + m, b + m
+
+def get_vsys():
+    CONVERSION = 3 * 3.3 / 65535
+    wlan = network.WLAN(network.STA_IF)
+    wlan_active = wlan.active()
+
+    try:
+        # Don't use the WLAN chip for a moment.
+        wlan.active(False)
+
+        # Make sure pin 25 is high.
+        Pin(25, mode=Pin.OUT, pull=Pin.PULL_DOWN).value(True)
+
+        # Reconfigure pin 29 as an input.
+        p29 = Pin(29, Pin.IN)
+
+        vsys = ADC(p29)
+        return vsys.read_u16() * CONVERSION
+    finally:
+        # Restore the pin state and possibly reactivate WLAN
+        Pin(29, Pin.ALT, pull=Pin.PULL_DOWN, alt=7)
+        wlan.active(wlan_active)
+
+def get_temperature():
+    CONVERSION = 3.3 / 65535
+    sensor = ADC(4)
+    adc_value = sensor.read_u16()
+    volt = CONVERSION * adc_value
+    temperature = 27 - (volt - 0.706) / 0.001721
+    return temperature
