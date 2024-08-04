@@ -6,177 +6,354 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Robotika[0]</title>
 
-	<link rel="stylesheet" href="reveal.js/dist/reveal.css"/>
-	<link rel="stylesheet" href="reveal.js/dist/theme/night.css"/>
+	<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+
+	<link rel="stylesheet" href="reveal.js/dist/reveal.css" />
+	<link rel="stylesheet" href="reveal.js/dist/theme/night.css" />
 
 	<!-- For syntax highlighting -->
 	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
-    <!-- <link rel="stylesheet" href="reveal.js/plugin/highlight/monokai.css"> -->
+	<!-- <link rel="stylesheet" href="reveal.js/plugin/highlight/monokai.css"> -->
 </head>
 
 <body>
-<div class="reveal"><div class="slides">
+	<div class="reveal">
+		<div class="slides">
 
-<!-- Title -->
-<section>
+			<!-- Title -->
+			<section>
 
-<h1 class="r-fit-text">Robotika[0]</h1>
-<h2>2024</h2>
+				<h1 class="r-fit-text">Robotika[0]</h1>
+				<h2>2024</h2>
 
-</section>
+			</section>
 
-<!-- Introductions -->
-<section>
-<h2>Bemutatkozás</h2>
+			<!-- Introductions -->
+			<section>
+				<h2>Bemutatkozás</h2>
 
-<table>
-<tbody>
-<tr>
-<td>
-	<h3>Beni</h3>
-	<ul>
-		<li>11F</li>
-		<li>diákkör vezető</li>
-		<li>tavalyi robotika</li>
-		<li>rust shill</li>
-		<li>nixos user</li>
-	</ul>
-</td>
+				<div style="display: flex;">
+					<div>
+						<h3 class="fragment">Beni</h3>
+						<ul>
+							<li class="fragment">11F</li>
+							<li class="fragment">diákkör vezető</li>
+							<li class="fragment">tavalyi robotika</li>
+							<li class="fragment">rust shill</li>
+							<li class="fragment">nixos user</li>
+						</ul>
+					</div>
 
-<td class="fragment">
-	<h3>Kristóf</h3>
-	<ul>
-		<li>13F (BME mérnökinfó)</li>
-		<li>cybersec</li>
-		<li>rust shill</li>
-		<li>arch btw</li>
-	</ul>
-</td>
-</tr>
-</tbody>
-</table>
-</section>
+					<div>
+						<h3 class="fragment">Kristóf</h3>
+						<ul>
+							<li class="fragment">13F (BME mérnökinfó)</li>
+							<li class="fragment">diákkör alapító</li>
+							<li class="fragment">cybersec</li>
+							<li class="fragment">rust shill</li>
+							<li class="fragment">arch btw</li>
+						</ul>
+					</div>
 
-<!-- Mit fogunk megépíteni? - cél -->
-<section data-auto-animate>
+				</div>
+			</section>
 
-<h2 data-id="title">Mit fogunk megépíteni? - cél</h3>
+			<!-- Mit fogunk megépíteni? - cél -->
+			<section data-auto-animate>
 
-<ul>
-	<li data-id="robot">egy kétkerekű vonal- / falkövető robot</li>
-	<li data-id="assembly">könnyen összeszerelhető</li>
-	<li data-id="prog">programozható</li>
-	<li data-id="wireless">vezeték nélküli</li>
-</ul>
+				<h2 data-id="title">Mit fogunk megépíteni? - cél</h3>
 
-</section>
+					<ul>
+						<li class="fragment" data-id="robot">egy kétkerekű vonal- / falkövető robot</li>
+						<li class="fragment" data-id="assembly">könnyen összeszerelhető</li>
+						<li class="fragment" data-id="prog">programozható</li>
+						<li class="fragment" data-id="wireless">vezeték nélküli</li>
+					</ul>
 
-<!-- Mit fogunk megépíteni? - megvalósítás -->
-<section data-auto-animate>
-<h4 data-id="title">Mit fogunk megépíteni? - megvalósítás</h4>
+			</section>
 
-<ul>
-	<li data-id="robot">egy kétkerekű vonal- / falkövető robot
-		<ul><li>fordulatszám, nyomaték, max sebesség</li></ul>
-	</li>
+			<!-- Mit fogunk megépíteni? - megvalósítás -->
+			<section data-auto-animate>
+				<h4 data-id="title">Mit fogunk megépíteni? - megvalósítás</h4>
 
-	<li data-id="assembly">
-		könnyen összeszerelhető
-		<ul>
-			<li>3D nyomtatott váz
-				<ul><li>több darabban</li></ul>
-			</li>
-			<li>breadboard (próbapanel)</li>
-		</ul>
-	</li>
+				<ul>
+					<li data-id="robot">egy kétkerekű vonal- / falkövető robot
+						<ul>
+							<li>fordulatszám, nyomaték, max sebesség</li>
+						</ul>
+					</li>
 
-	<li data-id="prog">programozható
-		<ul><li>mikrokontroller (Rasperry Pi Pico W)</li></ul>
-	</li>
+					<li data-id="assembly">
+						könnyen összeszerelhető
+						<ul>
+							<li>3D nyomtatott váz
+								<ul>
+									<li>több darabban</li>
+								</ul>
+							</li>
+							<li>breadboard (próbapanel)</li>
+						</ul>
+					</li>
 
-	<li data-id="wireless">vezeték nélküli
-		<ul>
-			<li>akkumulátor</li>
-			<li>wifi</li>
-		</ul>
-	</li>
-</ul>
+					<li data-id="prog">programozható
+						<ul>
+							<li>mikrokontroller (Rasperry Pi Pico W)</li>
+						</ul>
+					</li>
 
-</section>
+					<li data-id="wireless">vezeték nélküli
+						<ul>
+							<li>akkumulátor</li>
+							<li>wifi</li>
+						</ul>
+					</li>
+				</ul>
 
-<!-- Downloads #1 -->
-<section data-auto-animate>
-<h2>Downloads</h2>
+			</section>
 
-<ul>
-	<li><a href="https://code.visualstudio.com/download/">VSCode</a></li>
-	<li><a href="https://www.python.org/downloads/">Python</a></li>
-	<li><a href="https://micropython.org/download/RPI_PICO_W/">MicroPython firmware</a></li>
-</ul>
-</section>
+			<!-- Downloads #1 -->
+			<section data-auto-animate>
+				<h2>Downloads</h2>
 
-<!-- Downloads #2 -->
-<section data-auto-animate>
-<h2>Downloads</h2>
+				<ul>
+					<li class="fragment"><a target="_blank" href="https://code.visualstudio.com/download/">VSCode</a>
+					</li>
+					<li class="fragment"><a target="_blank" href="https://www.python.org/downloads/">Python</a></li>
+					<li class="fragment"><a target="_blank"
+							href="https://micropython.org/download/RPI_PICO_W/">MicroPython
+							firmware</a></li>
+				</ul>
+			</section>
 
-<ul>
-	<li><a href="https://code.visualstudio.com/download/">VSCode</a></li>
-	<li><pre><code data-trim data-noescape class="hljs bash r-fit-text">
-		winget install python.python.3.13
-	</code></pre></li>
-	<li><a href="https://micropython.org/download/RPI_PICO_W/">MicroPython firmware</a></li>
-</ul>
-</section>
-	
-<!-- Python packages -->
-<section>
-<h2>Python packages</h2>
-<pre><code data-trim data-noescape class="hljs bash">
-pip install --user mpremote --break-system-packages
-</code></pre>
+			<!-- Downloads #2 -->
+			<section data-auto-animate>
+				<h2>Downloads</h2>
 
-<pre><code data-trim data-noescape class="hljs bash r-fit-text">
-pip install -U micropython-rp2-pico_w-stubs --no-user --target ./typings
-</code></pre>
+				<ul>
+					<li><a target="_blank" href="https://code.visualstudio.com/download/">VSCode</a></li>
+					<li>
+						<pre><code data-trim data-noescape class="hljs powershell r-fit-text" style="vertical-align: middle;">
+							$ winget install python.python.3.13
+						</code></pre>
+					</li>
+					<li><a target="_blank" href="https://micropython.org/download/RPI_PICO_W/">MicroPython firmware</a>
+					</li>
+				</ul>
+			</section>
 
-</section>
-		
-<!-- Hello world #1 -->
-<section data-auto-animate>
-<h2 data-id="title">Hello World! 👋</h2>
-<pre><code data-trim data-noescape class="hljs python">
-print('Hello World')
-</code></pre>
-</section>
+			<!-- Python packages -->
+			<section>
+				<h2>Python packages</h2>
+				<pre><code data-trim data-noescape class="hljs powershell">
+				$ pip install --user mpremote --break-system-packages
+				</code></pre>
 
-<!-- Hello world #2 -->
-<section data-auto-animate>
-<h2 data-id="title">Hello World! 🤖</h2>
-<pre><code data-trim data-noescape class="hljs python" data-line-numbers>
-from time import sleep_ms
-from machine import Pin
+				<pre><code data-trim data-noescape class="hljs powershell r-fit-text">
+				$ pip install -U micropython-rp2-pico_w-stubs --no-user --target ./typings
+				</code></pre>
 
-led = Pin("LED", Pin.OUT)
+			</section>
 
-for i in range(10):
-	print(i)
-	led.toggle()
-	sleep_ms(500)
+			<!-- Hello world #1 -->
+			<section data-auto-animate>
+				<h2 data-id="title">Hello World! 👋</h2>
 
-print('done')
-</code></pre>
-</section>
+				<pre><code data-trim data-noescape class="hljs python">
+				print('Hello World')
+				</code></pre>
+			</section>
 
-</div></div>
+			<!-- Mikrokontroller alapok #1 -->
+			<section data-auto-animate>
+				<h2>Mikrokontroller alapok</h2>
+				<div>
+					<div>
+						<ul>
+							<li class="fragment">egy processzor (mint rendes számítógépben)</li>
+							<li class="fragment">feltöltjük rá a firmware-t (MicroPython)</li>
+							<li class="fragment">IO − pin-ek (tüskék)
+								<ul>
+									<li class="fragment">analóg / digitális (gyakoribb)</li>
+								</ul>
+							</li>
+						</ul>
+					</div>
+					<ul>
+			</section>
 
-<script src="reveal.js/dist/reveal.js"></script>
-<script src="reveal.js/plugin/highlight/highlight.js"></script>
-<script>
-	Reveal.initialize({
-		slideNumber: 'c/t',
-		plugins: [ RevealHighlight ]
-	});
-</script>
+			<!-- Mikrokontroller alapok #2 -->
+			<section data-auto-animate>
+				<h2>Mikrokontroller alapok</h2>
+				<div style="display: flex;">
+					<div>
+						<ul>
+							<li>egy processzor (mint rendes számítógépben)</li>
+							<li>feltöltjük rá a firmware-t (MicroPython)</li>
+							<li>IO − pin-ek (tüskék)
+								<ul>
+									<li>analóg / digitális (gyakoribb)</li>
+								</ul>
+							</li>
+						</ul>
+					</div>
+
+					<div><img src="../picow.svg" alt="pico w"></div>
+			</section>
+
+			<!-- Hello world #1 -->
+			<section data-auto-animate>
+				<h2 data-id="title">Hello World! 🤖</h2>
+
+				<pre><code data-id="code" data-trim data-noescape data-line-numbers class="hljs python">
+				from machine import Pin
+
+				led = Pin("LED", Pin.OUT)
+
+				led.toggle()
+				</code></pre>
+			</section>
+
+			<!-- Hello world #2 -->
+			<section data-auto-animate>
+				<h2 data-id="title">Hello World! 🤖</h2>
+
+				<pre><code data-id="code" data-trim data-noescape data-line-numbers class="hljs python">
+				from time import sleep_ms
+				from machine import Pin
+
+				led = Pin("LED", Pin.OUT)
+
+				while True:
+					led.toggle()
+					sleep_ms(500)
+				</code></pre>
+			</section>
+
+			<!-- Breadboard -->
+			<section>
+				<h2>Breadboard</h2>
+				<img src="breadboard.png" alt="breadboard">
+			</section>
+
+			<!-- Buzzer #1 -->
+			<section data-auto-animate data-auto-animate-id="buzzer">
+				<h2 data-id="title">Buzzer</h2>
+				<img src="buzzer.png" alt="buzzer wiring">
+			</section>
+
+			<!-- Buzzer #2 -->
+			<section data-auto-animate data-auto-animate-id="buzzer">
+				<h2 data-id="title">Buzzer</h2>
+				<ul>
+					<li class="fragment">hang ⇒ frekvencia, hangerő
+						<ul>
+							<li class="fragment">folytonos (vs mikrokontroller)</li>
+						</ul>
+					</li>
+					<li class="fragment">folytonos jel "szimulálása"
+						<ul>
+							<li class="fragment">ötlet: gyorsan ki be kapcsoljuk (<b>P</b>ulse <b>W</b>idth
+								<b>M</b>odulation)
+								<ul>
+									<li class="fragment">frekvencia: adódik</li>
+									<li class="fragment">hangerő: mennyi ideig van bekapcsolva</li>
+								</ul>
+							</li>
+						</ul>
+					</li>
+				</ul>
+			</section>
+
+			<!-- Buzzer #3 -->
+			<section data-auto-animate data-auto-animate-id="buzzer">
+				<h2 data-id="title">Buzzer</h2>
+				<img src="sine.svg" alt="sine">
+			</section>
+
+			<!-- Buzzer #4 -->
+			<section data-auto-animate data-auto-animate-id="buzzer">
+				<h2 data-id="title">Buzzer</h2>
+				<img src="sine.svg" alt="sine">
+				<img src="square.svg" alt="square">
+			</section>
+
+			<!-- Buzzer #5 -->
+			<section data-auto-animate data-auto-animate-id="buzzer">
+				<h2 data-id="title">Buzzer</h2>
+				<pre><code data-id="code" data-trim data-noescape data-line-numbers="4|5|9|" class="hljs python">
+					from machine import Pin, PWM
+					from time import sleep_ms
+
+					buzzer = PWM(Pin(0, Pin.OUT))
+					buzzer.duty_u16(0x7fff)
+
+					sleep_ms(2000)
+
+					buzzer.off()
+				</code></pre>
+			</section>
+
+			<!-- Ohm's law #1 -->
+			<section data-auto-animate>
+				<h2>Rövid ⚡ kitérő</h2>
+			</section>
+
+			<!-- Ohm's law #2 -->
+			<section data-auto-animate>
+				<h2>Rövid ⚡ kitérő</h2>
+				<img src="ohms_law.png" alt="Ohm's law">
+			</section>
+
+			<!-- Ohm's law #3 -->
+			<section data-auto-animate>
+				<h2>Rövid ⚡ kitérő</h2>
+				<p>Ohm törvénye: $R = \frac{U}{I}$</p>
+				<img src="ohms_law.png" alt="Ohm's law">
+			</section>
+
+			<!-- RGB LED #1 -->
+			<section data-auto-animate data-auto-animate-id="led">
+				<h2>
+					<span style="color: red;">R</span>
+					<span style="color: green;">G</span>
+					<span style="color: blue;">B</span>
+					led
+				</h2>
+				<img src="ca.png" alt="rgb led">
+			</section>
+
+			<!-- RGB LED #2 -->
+			<section data-auto-animate data-auto-animate-id="led">
+				<h2>
+					<span style="color: red;">R</span>
+					<span style="color: green;">G</span>
+					<span style="color: blue;">B</span>
+					led
+				</h2>
+				<img src="led_wiring.png" alt="rgb led">
+			</section>
+
+			<section>
+				<h2 style="font-family: monospace;">&lt;\&gt;</h2>
+			</section>
+		</div>
+	</div>
+
+	<script src="reveal.js/dist/reveal.js"></script>
+	<script src="reveal.js/plugin/highlight/highlight.js"></script>
+	<script src="reveal.js/plugin/search/search.js"></script>
+	<script src="reveal.js/plugin/notes/notes.js"></script>
+	<script src="reveal.js/plugin/math/math.js"></script>
+	<script src="reveal.js/plugin/zoom/zoom.js"></script>
+	<script>
+		Reveal.initialize({
+			hash: true,
+			preloadIframes: true,
+			slideNumber: 'c/t',
+			plugins: [RevealHighlight, RevealSearch, RevealNotes, RevealMath, RevealZoom],
+		});
+	</script>
 
 </body>
+
 </html>
