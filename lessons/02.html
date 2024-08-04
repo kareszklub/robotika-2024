@@ -1,0 +1,362 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Robotika[1]</title>
+
+	<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+
+	<link rel="stylesheet" href="reveal.js/dist/reveal.css" />
+	<link rel="stylesheet" href="reveal.js/dist/theme/night.css" />
+
+	<!-- For syntax highlighting -->
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+	<!-- <link rel="stylesheet" href="reveal.js/plugin/highlight/monokai.css"> -->
+</head>
+
+<body>
+	<div class="reveal">
+		<div class="slides">
+
+			<!-- Title -->
+			<section>
+				<h1 class="r-fit-text">Robotika[1]</h1>
+				<h2>2024</h2>
+			</section>
+
+			<!-- Servo -->
+			<section>
+				<h2>Servo</h2>
+				<img src="res/02/servo_wiring.png" alt="servo">
+			</section>
+
+			<!-- Classes #1 -->
+			<section data-auto-animate>
+				<h2>Programozási kitérő</h2>
+				<ul>
+					<li class="fragment">mi van ha több van ugyanabból a perifériából?</li>
+					<li data-id="copy" class="fragment">másoljuk le a kódot...</li>
+				</ul>
+			</section>
+
+			<!-- Classes #2 -->
+			<section data-auto-animate>
+				<h2>Programozási kitérő</h2>
+				<ul>
+					<li>mi van ha több van ugyanabból a perifériából?</li>
+					<li data-id="copy" style="text-decoration: line-through;">másoljuk le a kódot...</li>
+				</ul>
+			</section>
+
+			<!-- Classes #3 -->
+			<section data-auto-animate>
+				<h2>Programozási kitérő</h2>
+				<ul>
+					<li>mi van ha több van ugyanabból a perifériából?</li>
+					<li>csoportosítsuk ki közös részeket</li>
+				</ul>
+			</section>
+
+			<!-- Classes #4 -->
+			<section data-auto-animate>
+				<h2>Programozási kitérő</h2>
+				<pre><code data-line-numbers="3|4|6-7|9-16|" class="hljs python" data-trim data-noescape>
+					from machine import PWM, Pin
+
+					class Buzzer:
+						_p: PWM
+
+						def __init__(self, p: Pin, freq: int = 2000):
+							self._p = PWM(p, freq=freq)
+
+						def set_freq(self, freq: int):
+							self._p.freq(freq)
+
+						def set_volume(self, v: float):
+							self._p.duty_u16(int(v * 0x7fff))
+
+						def off(self):
+							self._p.deinit()
+				</code></pre>
+
+				<aside class="notes">
+					Itt meg kéne írni a servo és rgb led class-t is.
+				</aside>
+			</section>
+
+			<!-- config.json #1 -->
+			<section data-auto-animate data-auto-animate-id="cfg">
+				<h2>config.json</h2>
+				<p>Jó lenne ha a konfigurációt is ki lehetne csoportosítani...</p>
+			</section>
+
+			<!-- config.json #1 -->
+			<section data-auto-animate data-auto-animate-id="cfg">
+				<h2>config.json</h2>
+
+				<pre><code data-id="code" data-trim data-noescape data-line-numbers class="hljs json">
+					{
+
+						"rgb_led": {
+							"r": 16,
+							"g": 15,
+							"b": 14,
+
+							"freq": 2000
+						},
+
+						"servo": {
+							"pin": 22,
+							"freq": 50,
+
+							"min_duty": 550000,
+							"mid_duty": 1400000,
+							"max_duty": 2390000
+						},
+
+						"buzzer": {
+							"pin": 4,
+							"freq": 300
+						}
+					}
+				</code></pre>
+			</section>
+
+			<!-- config.json #2 -->
+			<section data-auto-animate data-auto-animate-id="cfg">
+				<h2>config.json</h2>
+
+				<pre><code data-id="code" data-trim data-noescape data-line-numbers="1|3|" class="hljs python">
+					from json import load
+
+					with open('config.json') as f:
+						cfg = load(f)
+				</code></pre>
+			</section>
+
+			<!-- Motorok -->
+			<section>
+				<h2>Motorok</h2>
+				<ul>
+					<li class="fragment">áram ⇒ forgás
+						<ul>
+							<li class="fragment">fun fact: fordítva is működik</li>
+						</ul>
+					</li>
+					<li class="fragment">a forgás iránya az áram irányától függ</li>
+					<li class="fragment">de hogy adunk neki több áramot mint amit a pico tud?</li>
+					<li class="fragment">és hogy cseréljük meg a kábeleket menet közben???</li>
+				</ul>
+			</section>
+
+			<!-- H bridge #1 -->
+			<section data-auto-animate>
+				<h2>H bridge</h2>
+
+				<img src="res/02/h_bridge.svg" alt="H bridge">
+			</section>
+
+			<!-- H bridge #2 -->
+			<section data-auto-animate>
+				<h2>H bridge</h2>
+
+				<img src="res/02/h_bridge_wiring.png" alt="">
+			</section>
+
+			<!-- H bridge #3 -->
+			<section data-auto-animate>
+				<h2>H bridge</h2>
+
+				<table>
+					<thead>
+						<tr>
+							<td>EN</td>
+							<td>1A</td>
+							<td>2A</td>
+							<td>FUNCTION</td>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>H</td>
+							<td>L</td>
+							<td>H</td>
+							<td>Turn right</td>
+						</tr>
+						<tr>
+							<td>H</td>
+							<td>H</td>
+							<td>L</td>
+							<td>Turn left</td>
+						</tr>
+						<tr>
+							<td>H</td>
+							<td>L</td>
+							<td>L</td>
+							<td>Fast motor stop</td>
+						</tr>
+						<tr>
+							<td>H</td>
+							<td>H</td>
+							<td>H</td>
+							<td>Fast motor stop</td>
+						</tr>
+						<tr>
+							<td>L</td>
+							<td>X</td>
+							<td>X</td>
+							<td>Free-running</td>
+						</tr>
+					</tbody>
+				</table>
+			</section>
+
+			<!-- H bridge #4 -->
+			<section data-auto-animate>
+				<h2>H bridge</h2>
+				<pre><code data-id="code" data-trim data-noescape data-line-numbers="4-12|14-24|26-36|38-44|46-54" class="hljs python">from machine import Pin, PWM
+from utils import clamp
+
+class HBridge:
+	_r_pwm: PWM
+	_l_pwm: PWM
+
+	_l_1: Pin
+	_l_2: Pin
+
+	_r_1: Pin
+	_r_2: Pin
+
+def __init__(self,
+	l_pwm: Pin, r_pwm: Pin,
+	l_1: Pin, l_2: Pin,
+	r_1: Pin, r_2: Pin,
+	freq: int = 2000):
+	self._r_pwm = PWM(r_pwm, freq=freq)
+	self._l_pwm = PWM(l_pwm, freq=freq)
+	self._l_1 = l_1
+	self._l_2 = l_2
+	self._r_1 = r_1
+	self._r_2 = r_2
+
+def drive(self, l: float, r: float):
+	l = clamp(l, -1, 1)
+	r = clamp(r, -1, 1)
+
+	self._l_1.value(l < 0)
+	self._l_2.value(l > 0)
+	self._l_pwm.duty_u16(int(abs(l) * 0xffff))
+
+	self._r_1.value(r > 0)
+	self._r_2.value(r < 0)
+	self._r_pwm.duty_u16(int(abs(r) * 0xffff))
+
+def brake(self):
+	self._r_1.value(True)
+	self._r_2.value(True)
+	self._r_1.value(True)
+	self._r_2.value(True)
+	self._l_pwm.duty_u16(0)
+	self._r_pwm.duty_u16(0)
+
+def set_freq(self, freq: int):
+	self._l_pwm.freq(freq)
+	self._r_pwm.freq(freq)
+
+def off(self):
+	self.drive(0, 0)
+
+	self._l_pwm.deinit()
+	self._r_pwm.deinit()
+
+				</code></pre>
+			</section>
+
+			<!-- Ultra sensor #1 -->
+			<section data-auto-animate data-auto-animate-id="ultra">
+				<h2>Ultra sensor</h2>
+			</section>
+
+			<!-- Ultra sensor #2 -->
+			<section data-auto-animate data-auto-animate-id="ultra">
+				<h2>Ultra sensor</h2>
+				<img src="res/02/ultra_sensor_1.png" alt="ultra sensor 1">
+			</section>
+
+			<!-- Ultra sensor #3 -->
+			<section data-auto-animate data-auto-animate-id="ultra">
+				<h2>Ultra sensor</h2>
+				<img src="res/02/ultra_sensor_1.png" alt="ultra sensor 1">
+				<img src="res/02/ultra_sensor_2.png" alt="ultra sensor 2">
+			</section>
+
+			<!-- Ultra sensor #4 -->
+			<section data-auto-animate data-auto-animate-id="ultra">
+				<h2>Ultra sensor</h2>
+
+				<pre><code data-id="code" data-trim data-noescape data-line-numbers="5-8|10-16|18|19-21|23|25|26-29" class="hljs python">from machine import Pin, PWM
+from machine import Pin, time_pulse_us
+from time import sleep_us
+
+M_PER_US = const(0.0001715)
+
+MIN_DIST = const(0.02)
+MAX_DIST = const(4.0)
+
+class UltraSensor:
+    _trig: Pin
+    _echo: Pin
+
+	def __init__(self, trig: Pin, echo: Pin):
+        self._trig = trig
+        self._echo = echo
+
+    def measure_sync(self) -> float | None:
+        self._trig.value(True)
+        sleep_us(15)
+        self._trig.value(False)
+
+        dur_us = time_pulse_us(self._echo, 1, 60_000)
+
+        m = dur_us * M_PER_US
+        if m < MIN_DIST or m > MAX_DIST:
+            return None
+
+        return m
+				</code></pre>
+			</section>
+
+			<!-- Ultra sensor #4 -->
+			<section data-auto-animate data-auto-animate-id="ultra">
+				<h2>Ultra sensor</h2>
+				<p>kissé zajos...</p>
+			</section>
+
+			<!-- <end> -->
+			<section>
+				<h2 style="font-family: monospace;">&lt;\&gt;</h2>
+			</section>
+		</div>
+	</div>
+
+	<script src="reveal.js/dist/reveal.js"></script>
+	<script src="reveal.js/plugin/highlight/highlight.js"></script>
+	<script src="reveal.js/plugin/markdown/markdown.js"></script>
+	<script src="reveal.js/plugin/search/search.js"></script>
+	<script src="reveal.js/plugin/notes/notes.js"></script>
+	<script src="reveal.js/plugin/math/math.js"></script>
+	<script src="reveal.js/plugin/zoom/zoom.js"></script>
+	<script>
+		Reveal.initialize({
+			hash: true,
+			preloadIframes: true,
+			slideNumber: 'c/t',
+			plugins: [RevealMarkdown, RevealHighlight, RevealSearch, RevealNotes, RevealMath, RevealZoom],
+		});
+	</script>
+
+</body>
+
+</html>

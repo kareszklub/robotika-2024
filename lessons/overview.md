@@ -23,6 +23,7 @@
 ## Lesson #2
 
 - servo
+- classes
 - config.json
 - motorok
   - H bridge
