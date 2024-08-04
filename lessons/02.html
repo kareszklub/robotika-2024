@@ -96,7 +96,7 @@
 			<section data-auto-animate data-auto-animate-id="cfg">
 				<h2>config.json</h2>
 
-				<pre><code data-id="code" data-trim data-noescape data-line-numbers class="hljs json">
+				<pre data-id="code"><code  data-trim data-noescape data-line-numbers class="hljs json">
 					{
 
 						"rgb_led": {
@@ -128,7 +128,7 @@
 			<section data-auto-animate data-auto-animate-id="cfg">
 				<h2>config.json</h2>
 
-				<pre><code data-id="code" data-trim data-noescape data-line-numbers="1|3|" class="hljs python">
+				<pre data-id="code"><code  data-trim data-noescape data-line-numbers="1|3|" class="hljs python">
 					from json import load
 
 					with open('config.json') as f:
@@ -216,7 +216,7 @@
 			<!-- H bridge #4 -->
 			<section data-auto-animate>
 				<h2>H bridge</h2>
-				<pre><code data-id="code" data-trim data-noescape data-line-numbers="4-12|14-24|26-36|38-44|46-54" class="hljs python">from machine import Pin, PWM
+				<pre data-id="code"><code  data-trim data-noescape data-line-numbers="4-12|14-24|26-36|38-44|46-54" class="hljs python">from machine import Pin, PWM
 from utils import clamp
 
 class HBridge:
@@ -295,8 +295,15 @@ def off(self):
 			<!-- Ultra sensor #4 -->
 			<section data-auto-animate data-auto-animate-id="ultra">
 				<h2>Ultra sensor</h2>
+				<img src="res/02/ultra_wiring.png" alt="ultra wiring">
+			</section>
 
-				<pre><code data-id="code" data-trim data-noescape data-line-numbers="5-8|10-16|18|19-21|23|25|26-29" class="hljs python">from machine import Pin, PWM
+			<!-- Ultra sensor #5 -->
+			<section data-auto-animate data-auto-animate-id="ultra">
+				<h2>Ultra sensor</h2>
+
+				<pre data-id="code"><code data-trim data-noescape data-line-numbers="5-8|10-16|18|19-21|23|25|26-29" class="hljs python">
+from machine import Pin, PWM
 from machine import Pin, time_pulse_us
 from time import sleep_us
 
@@ -328,7 +335,7 @@ class UltraSensor:
 				</code></pre>
 			</section>
 
-			<!-- Ultra sensor #4 -->
+			<!-- Ultra sensor #6 -->
 			<section data-auto-animate data-auto-animate-id="ultra">
 				<h2>Ultra sensor</h2>
 				<ul>
@@ -338,13 +345,13 @@ class UltraSensor:
 				</ul>
 			</section>
 
-			<!-- Ultra sensor #5 -->
+			<!-- Ultra sensor #7 -->
 			<section data-auto-animate data-auto-animate-id="ultra">
 				<h2>Ultra sensor</h2>
 				<img src="res/02/buffer.svg" alt="buffer" data-id="buf">
 			</section>
 
-			<!-- Ultra sensor #6 -->
+			<!-- Ultra sensor #8 -->
 			<section data-auto-animate data-auto-animate-id="ultra">
 				<h2>Ultra sensor</h2>
 				<img src="res/02/ring_buffer.png" alt="ring buffer" data-id="buf">
@@ -354,9 +361,10 @@ class UltraSensor:
 			<section data-auto-animate data-auto-animate-id="ultra">
 				<h2>Ultra sensor</h2>
 
-				<pre><code data-id="code" data-trim data-noescape data-line-numbers="5-8|10-16|18|19-21|23|25|26-29" class="hljs python">from machine import Pin, PWM
+				<pre data-id="code"><code data-trim data-noescape data-line-numbers="|14-16|18-21|37-45" class="hljs python">
 from machine import Pin, time_pulse_us
 from time import sleep_us
+from array import array
 
 M_PER_US = const(0.0001715)
 
@@ -367,7 +375,15 @@ class UltraSensor:
 	_trig: Pin
 	_echo: Pin
 
-	def __init__(self, trig: Pin, echo: Pin):
+	_arr: array[float]
+	_arr_len: int
+	_arr_p: int
+
+	def __init__(self, trig: Pin, echo: Pin, array_len: int = 5):
+		self._arr = array('f', [])
+		self._arr_len = array_len
+		self._arr_p = 0
+
 		self._trig = trig
 		self._echo = echo
 
@@ -382,7 +398,15 @@ class UltraSensor:
 		if m < MIN_DIST or m > MAX_DIST:
 			return None
 
-		return m
+		l = len(self._arr)
+		if self._arr_len <= l:
+			self._arr[self._arr_p] = m
+			self._arr_p = (self._arr_p + 1) % self._arr_len
+		else:
+			self._arr.append(m)
+			self._arr_p = 0
+
+		return sum(self._arr[:self._arr_len]) / self._arr_len					
 				</code></pre>
 			</section>
 
