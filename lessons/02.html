@@ -331,7 +331,59 @@ class UltraSensor:
 			<!-- Ultra sensor #4 -->
 			<section data-auto-animate data-auto-animate-id="ultra">
 				<h2>Ultra sensor</h2>
-				<p>kissé zajos...</p>
+				<ul>
+					<li class="fragment">kissé zajos... ki kéne simítani</li>
+					<li class="fragment">átlagoljuk</li>
+					<li class="fragment">de hogyan tároljuk a korábbiakat?</li>
+				</ul>
+			</section>
+
+			<!-- Ultra sensor #5 -->
+			<section data-auto-animate data-auto-animate-id="ultra">
+				<h2>Ultra sensor</h2>
+				<img src="res/02/buffer.svg" alt="buffer" data-id="buf">
+			</section>
+
+			<!-- Ultra sensor #6 -->
+			<section data-auto-animate data-auto-animate-id="ultra">
+				<h2>Ultra sensor</h2>
+				<img src="res/02/ring_buffer.png" alt="ring buffer" data-id="buf">
+			</section>
+
+			<!-- Ultra sensor #7 -->
+			<section data-auto-animate data-auto-animate-id="ultra">
+				<h2>Ultra sensor</h2>
+
+				<pre><code data-id="code" data-trim data-noescape data-line-numbers="5-8|10-16|18|19-21|23|25|26-29" class="hljs python">from machine import Pin, PWM
+from machine import Pin, time_pulse_us
+from time import sleep_us
+
+M_PER_US = const(0.0001715)
+
+MIN_DIST = const(0.02)
+MAX_DIST = const(4.0)
+
+class UltraSensor:
+	_trig: Pin
+	_echo: Pin
+
+	def __init__(self, trig: Pin, echo: Pin):
+		self._trig = trig
+		self._echo = echo
+
+	def measure_sync(self) -> float | None:
+		self._trig.value(True)
+		sleep_us(15)
+		self._trig.value(False)
+
+		dur_us = time_pulse_us(self._echo, 1, 60_000)
+
+		m = dur_us * M_PER_US
+		if m < MIN_DIST or m > MAX_DIST:
+			return None
+
+		return m
+				</code></pre>
 			</section>
 
 			<!-- <end> -->
