@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Robotika[2]</title>
+
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+
+    <link rel="stylesheet" href="reveal.js/dist/reveal.css" />
+    <link rel="stylesheet" href="reveal.js/dist/theme/night.css" />
+
+    <!-- For syntax highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
+    <!-- <link rel="stylesheet" href="reveal.js/plugin/highlight/monokai.css"> -->
+
+    <link rel="stylesheet" href="res/scrollbar.css">
+</head>
+
+<body>
+    <div class="reveal">
+        <div class="slides">
+
+            <!-- Title -->
+            <section>
+                <h1 class="r-fit-text">Robotika[3]</h1>
+                <h2>2024</h2>
+            </section>
+
+            <!-- Reset button #1 -->
+            <section data-auto-animate data-auto-animate-id="rst">
+                <h2>Reset button</h2>
+            </section>
+
+            <!-- Reset button #2 -->
+            <section data-auto-animate data-auto-animate-id="rst">
+                <h2>Reset button</h2>
+                <img src="res/04/reset_button_wiring.svg" alt="reset button wiring">
+            </section>
+
+            <!-- Pullup #1 -->
+            <section data-auto-animate data-auto-animate-id="pullup">
+                <h2>Újabb ⚡ kitérő</h2>
+                <img data-id="img" src="res/04/pull_up_1.svg" alt="no pull up">
+            </section>
+
+            <!-- Pullup #2 -->
+            <section data-auto-animate data-auto-animate-id="pullup">
+                <h2>Újabb ⚡ kitérő</h2>
+                <img data-id="img" src="res/04/pull_up_2.svg" alt="pull up">
+            </section>
+
+            <!-- Reset button #1 -->
+            <section data-auto-animate data-auto-animate-id="rst">
+                <h2>Reset button</h2>
+                <pre data-id="code"><code data-trim data-noescape class="hljs python"
+                    data-line-numbers>
+from machine import Pin, reset
+
+bt = Pin(cfg['reset_button']['pin'], Pin.IN)
+                </code></pre>
+            </section>
+
+            <!-- Reset button #2 -->
+            <section data-auto-animate data-auto-animate-id="rst">
+                <h2>Reset button</h2>
+                <pre data-id="code"><code data-trim data-noescape class="hljs python"
+                    data-line-numbers>
+from machine import Pin, reset
+
+bt = Pin(cfg['reset_button']['pin'], Pin.IN, Pin.PULL_UP)
+                </code></pre>
+            </section>
+
+            <!-- Reset button #3 -->
+            <section data-auto-animate data-auto-animate-id="rst">
+                <h2>Reset button</h2>
+                <pre data-id="code"><code data-trim data-noescape class="hljs python"
+                        data-line-numbers>
+from machine import Pin, reset
+
+bt = Pin(cfg['reset_button']['pin'], Pin.IN, Pin.PULL_UP)
+bt.irq(lambda _: reset(), hard=True)
+                    </code></pre>
+            </section>
+
+            <!-- PID #1 -->
+            <section data-auto-animate data-auto-animate-id="pid">
+                <h2>PID</h2>
+            </section>
+
+            <!-- <end> -->
+            <section>
+                <h2 style="font-family: monospace;">&lt;\&gt;</h2>
+            </section>
+        </div>
+    </div>
+
+    <script src="reveal.js/dist/reveal.js"></script>
+    <script src="reveal.js/plugin/highlight/highlight.js"></script>
+    <script src="reveal.js/plugin/markdown/markdown.js"></script>
+    <script src="reveal.js/plugin/search/search.js"></script>
+    <script src="reveal.js/plugin/notes/notes.js"></script>
+    <script src="reveal.js/plugin/math/math.js"></script>
+    <script src="reveal.js/plugin/zoom/zoom.js"></script>
+    <script>
+        Reveal.initialize({
+            hash: true,
+            preloadIframes: true,
+            slideNumber: 'c/t',
+            plugins: [RevealMarkdown, RevealHighlight, RevealSearch, RevealNotes, RevealMath, RevealZoom],
+        });
+    </script>
+
+</body>
+
+</html>
