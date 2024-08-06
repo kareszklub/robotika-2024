@@ -14,6 +14,8 @@
     <!-- For syntax highlighting -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
     <!-- <link rel="stylesheet" href="reveal.js/plugin/highlight/monokai.css"> -->
+
+    <link rel="stylesheet" href="res/scrollbar.css">
 </head>
 
 <body>
@@ -62,7 +64,7 @@
             <section data-auto-animate data-auto-animate-id="i2c">
                 <h2>I²C</h2>
                 <pre data-id="code"><code data-trim data-noescape class="hljs python"
-                    data-line-numbers="5-6|8-11|13-14|16-21|23-31|33-40|55-57|59-60|42-43|62-63|45-46|48-53|65-67">
+                    data-line-numbers="5-6|8-11|13-14|16-21|23-31|33-40|57-60|62-63|42-44|65-66|50-55|46-48|68-70">
 from machine import I2C, Pin
 from time import sleep_ms
 import struct
@@ -105,10 +107,12 @@ class RgbSensor:
             self.set_gain(gain)
 
     def _write8(self, reg: int, value: int):
-        self._i2c.writeto_mem(self._addr, CMD_BIT | reg, (value & 0xFF).to_bytes(1, 'little'))
+        self._i2c.writeto_mem(self._addr, CMD_BIT | reg,
+                (value & 0xFF).to_bytes(1, 'little'))
 
     def _read8(self, reg: int) -> int:
-        return struct.unpack('&lt;B', self._i2c.readfrom_mem(self._addr, CMD_BIT | reg, 1))[0]
+        return struct.unpack('&lt;B', self._i2c.readfrom_mem(
+            self._addr, CMD_BIT | reg, 1))[0]
 
     def _write_bits(self, reg: int, value: int, mask: int):
         old = self._read8(reg)
@@ -118,7 +122,8 @@ class RgbSensor:
         self._write8(reg, new)
 
     def get_data(self) -> tuple[int, int, int, int]:
-        color_bytes = self._i2c.readfrom_mem(self._addr, CMD_BIT | REG_CDATAL, 4 * 2)
+        color_bytes = self._i2c.readfrom_mem(self._addr,
+                            CMD_BIT | REG_CDATAL, 4 * 2)
         return struct.unpack('&lt;HHHH', color_bytes)
 
     def set_integration_time(self, it: int):
@@ -132,7 +137,7 @@ class RgbSensor:
             self._led_pin.value(state)                    
                 </code></pre>
             </section>
-            2
+
             <!-- <end> -->
             <section>
                 <h2 style="font-family: monospace;">&lt;\&gt;</h2>
