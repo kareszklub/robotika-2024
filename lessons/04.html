@@ -88,6 +88,160 @@ bt.irq(lambda _: reset(), hard=True)
             <!-- PID #1 -->
             <section data-auto-animate data-auto-animate-id="pid">
                 <h2>PID</h2>
+                <ul>
+                    <li class="fragment">feladat: maradjunk a faltól valamilyen távolságra</li>
+                    <li class="fragment">ötlet: a távolság valahányszorosát adjuk a motornak</li>
+                </ul>
+            </section>
+
+            <!-- PID #2 -->
+            <section data-auto-animate data-auto-animate-id="pid">
+                <h2>PID</h2>
+            </section>
+
+            <!-- PID #3 -->
+            <section data-auto-animate data-auto-animate-id="pid">
+                <h2>PID</h2>
+                <p data-id="math">
+                    \[ u(t) = K_{\text{p}} e(t) \]
+                </p>
+            </section>
+
+            <!-- PID #4 -->
+            <section data-auto-animate data-auto-animate-id="pid">
+                <h2>PID</h2>
+                <p data-id="math">
+                    \[ u(t) = K_{\text{p}} e(t) + K_{\text{i}} \int_{0}^{t}e(\tau)\, \mathrm {d} \tau \]
+                </p>
+            </section>
+
+            <!-- PID #5 -->
+            <section data-auto-animate data-auto-animate-id="pid">
+                <h2>PID</h2>
+                <p data-id="math">
+                    \[ u(t) = K_{\text{p}} e(t) + K_{\text{i}} \int_{0}^{t}e(\tau)\, \mathrm {d} \tau +
+                    K_{\text{d}} {\frac{\mathrm {d} e(t)}{\mathrm {d} t}} \]
+                </p>
+
+                <a href="https://www.youtube.com/watch?v=fusr9eTceEo" class="fragment">példa videó</a>
+            </section>
+
+            <!-- PID #6 -->
+            <section data-auto-animate data-auto-animate-id="pid">
+                <h2>PID</h2>
+                <pre data-id="code"><code data-trim data-noescape class="hljs python" data-line-numbers>
+from utils import clamp
+
+class PID:
+    sp: float
+
+    P: float
+    I: float
+    D: float
+
+    integr_min: float
+    integr_max: float
+
+    _prev_err: float
+    _integr: float
+
+    def __init__(self, sp: float, p: float, i: float, d: float, integr_min: float, integr_max: float):
+        self.sp = sp
+        self.P = p
+        self.I = i
+        self.D = d
+        self._integr_min = integr_min
+        self._integr_max = integr_max
+
+        self._prev_err = 0
+        self._integr = 0
+                </code></pre>
+            </section>
+
+            <!-- PID #7 -->
+            <section data-auto-animate data-auto-animate-id="pid">
+                <h2>PID</h2>
+                <p>meglepi: <span class="fragment">egyéni munka</span></p>
+            </section>
+
+            <!-- PID #8 -->
+            <section data-auto-animate data-auto-animate-id="pid">
+                <h2>PID</h2>
+                <pre data-id="code"><code data-trim data-noescape class="hljs python" data-line-numbers>
+from utils import clamp
+
+class PID:
+    sp: float
+
+    P: float
+    I: float
+    D: float
+
+    integr_min: float
+    integr_max: float
+
+    _prev_err: float
+    _integr: float
+
+    def __init__(self, sp: float, p: float, i: float, d: float, integr_min: float, integr_max: float):
+        self.sp = sp
+        self.P = p
+        self.I = i
+        self.D = d
+        self._integr_min = integr_min
+        self._integr_max = integr_max
+
+        self._prev_err = 0
+        self._integr = 0
+                </code></pre>
+            </section>
+
+            <!-- PID #9 -->
+            <section data-auto-animate data-auto-animate-id="pid">
+                <h2>PID</h2>
+                <pre data-id="code"><code data-trim data-noescape class="hljs python" data-line-numbers="27-41">
+from utils import clamp
+
+class PID:
+    sp: float
+
+    P: float
+    I: float
+    D: float
+
+    integr_min: float
+    integr_max: float
+
+    _prev_err: float
+    _integr: float
+
+    def __init__(self, sp: float, p: float, i: float, d: float, integr_min: float, integr_max: float):
+        self.sp = sp
+        self.P = p
+        self.I = i
+        self.D = d
+        self._integr_min = integr_min
+        self._integr_max = integr_max
+
+        self._prev_err = 0
+        self._integr = 0
+
+    def compute(self, pv: float, dt: float) -> float:
+        err = self.sp - pv
+
+        self._integr += err * dt
+        self._integr = clamp(
+            self._integr,
+            float(self.integr_min),
+            float(self.integr_max)
+        )
+
+        der = (err - self._prev_err) / dt
+
+        self._prev_err = err
+
+        return self.P * err + self.I * self._integr + self.D * der
+                </code></pre>
             </section>
 
             <!-- <end> -->

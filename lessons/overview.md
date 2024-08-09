@@ -80,5 +80,3 @@
   - bldc
 
 ## Lesson #8
-
-## Lesson #9
